@@ -243,7 +243,7 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
                 CajaDeAhorro cajaDestino = await _context.cajas.FindAsync(id);
                 if (cajaDestino == null)
                 {
-                    return Problem("No se encontró la caja"); //No se encontró la caja
+                    return Problem("El saldo es menor al monto que se desea retirar"); //No se encontró la caja
                 }
                 if (cajaDestino.saldo < monto)
                 {
@@ -263,7 +263,60 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
                 return Problem("Error.");
             }
         }
+        // GET: CajasDeAhorro/Transferir/5
+        public async Task<IActionResult> Transferir(int? id)
+        {
+            if (id == null || _context.cajas == null)
+            {
+                return Problem("ID null or _context.cajas null");
+            }
 
+            var cajaDeAhorro = await _context.cajas
+                .FirstOrDefaultAsync(m => m.id == id);
+            if (cajaDeAhorro == null)
+            {
+                return Problem("No existe tal caja de ahorro");
+            }
+
+            return View(cajaDeAhorro);
+        }
+
+
+        // POST: CajasDeAhorro/Transferir/5
+        [HttpPost, ActionName("Transferir")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Transferir(int id, int monto, int cbu)
+        {
+            try
+            {
+                CajaDeAhorro cajaOrigen = await _context.cajas.FindAsync(id);
+                CajaDeAhorro cajaDestino = _context.cajas.Where(caja => caja.cbu == cbu).FirstOrDefault();
+                if (cajaDestino == null)
+                {
+                    return Problem("No se encontro caja destino");
+                }
+                if (cajaOrigen.saldo < monto)
+                {
+                    return Problem("El monto es mayor que el saldo de la caja");
+                }
+                cajaOrigen.saldo -= monto;
+                Movimiento movimientoNuevo = new Movimiento(cajaOrigen, "Transferencia realizada", monto);
+                _context.movimientos.Add(movimientoNuevo);
+                cajaOrigen.movimientos.Add(movimientoNuevo);
+                _context.Update(cajaOrigen);
+                cajaDestino.saldo += monto;
+                Movimiento movimientoNuevo2 = new Movimiento(cajaDestino, "Transferencia recibida", monto);
+                _context.movimientos.Add(movimientoNuevo2);
+                cajaDestino.movimientos.Add(movimientoNuevo2);
+                _context.Update(cajaDestino);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                return Problem("Error");
+            }
+        }
 
         // GET: CajasDeAhorro/Delete/5
         public async Task<IActionResult> Delete(int? id)
@@ -313,5 +366,24 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
             }
             
         }
+
+        // GET: CajasDeAhorro/Movimientos/5
+        public async Task<IActionResult> Movimientos(int? id)
+        {
+            if (id == null || _context.cajas == null)
+            {
+                return NotFound();
+            }
+
+            var cajaDeAhorro = await _context.cajas
+                .FirstOrDefaultAsync(m => m.id == id);
+            if (cajaDeAhorro == null)
+            {
+                return NotFound();
+            }
+
+            return View(cajaDeAhorro);
+        }
     }
+
 }
