@@ -12,8 +12,8 @@ using WebApplication_plataformas_de_desarrollo.Data;
 namespace WebApplicationplataformasdedesarrollo.Migrations
 {
     [DbContext(typeof(MiContexto))]
-    [Migration("20221127212017_inicial")]
-    partial class inicial
+    [Migration("20221213164830_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -363,8 +363,7 @@ namespace WebApplicationplataformasdedesarrollo.Migrations
                 {
                     b.HasOne("WebApplication_plataformas_de_desarrollo.Models.CajaDeAhorro", "caja")
                         .WithMany("movimientos")
-                        .HasForeignKey("id_Caja")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("id_Caja");
 
                     b.Navigation("caja");
                 });
@@ -373,8 +372,7 @@ namespace WebApplicationplataformasdedesarrollo.Migrations
                 {
                     b.HasOne("WebApplication_plataformas_de_desarrollo.Models.Usuario", "usuario")
                         .WithMany("pagos")
-                        .HasForeignKey("id_usuario")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("id_usuario");
 
                     b.Navigation("usuario");
                 });
@@ -383,8 +381,7 @@ namespace WebApplicationplataformasdedesarrollo.Migrations
                 {
                     b.HasOne("WebApplication_plataformas_de_desarrollo.Models.Usuario", "titular")
                         .WithMany("pf")
-                        .HasForeignKey("id_titular")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("id_titular");
 
                     b.Navigation("titular");
                 });
@@ -393,8 +390,7 @@ namespace WebApplicationplataformasdedesarrollo.Migrations
                 {
                     b.HasOne("WebApplication_plataformas_de_desarrollo.Models.Usuario", "titular")
                         .WithMany("tarjetas")
-                        .HasForeignKey("id_titular")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("id_titular");
 
                     b.Navigation("titular");
                 });

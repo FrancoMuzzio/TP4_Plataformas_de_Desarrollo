@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -13,10 +14,26 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
     public class MovimientosController : Controller
     {
         private readonly MiContexto _context;
+        private Usuario? usuarioLogueado;
 
-        public MovimientosController(MiContexto context)
+        public MovimientosController(MiContexto context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _context.usuarios
+                    .Include(u => u.tarjetas)
+                    .Include(u => u.cajas)
+                    .Include(u => u.pf)
+                    .Include(u => u.pagos)
+                    .Load();
+            _context.cajas
+                .Include(c => c.movimientos)
+                .Include(c => c.titulares)
+                .Load();
+            _context.tarjetas.Load();
+            _context.pagos.Load();
+            _context.movimientos.Load();
+            _context.plazosFijos.Load();
+            usuarioLogueado = _context.usuarios.Where(u => u.id == httpContextAccessor.HttpContext.Session.GetInt32("IdUsuario")).FirstOrDefault();
         }
 
         // GET: Movimientos

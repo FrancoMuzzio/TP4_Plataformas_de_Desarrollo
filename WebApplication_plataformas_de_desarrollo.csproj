@@ -7,6 +7,24 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Migrations\20221127212017_inicial.cs" />
+    <Compile Remove="Migrations\20221127212017_inicial.Designer.cs" />
+    <Compile Remove="Migrations\20221213153040_DeleteCascade.cs" />
+    <Compile Remove="Migrations\20221213153040_DeleteCascade.Designer.cs" />
+    <Compile Remove="Migrations\20221213153615_Initial.cs" />
+    <Compile Remove="Migrations\20221213153615_Initial.Designer.cs" />
+    <Compile Remove="Migrations\20221213154911_Initial.cs" />
+    <Compile Remove="Migrations\20221213154911_Initial.Designer.cs" />
+    <Compile Remove="Migrations\20221213163519_OnDeleteBehaviourToSetNull.cs" />
+    <Compile Remove="Migrations\20221213163519_OnDeleteBehaviourToSetNull.Designer.cs" />
+    <Compile Remove="Migrations\20221213163652_Initial.cs" />
+    <Compile Remove="Migrations\20221213163652_Initial.Designer.cs" />
+    <Compile Remove="Migrations\20221213164156_Cascade.cs" />
+    <Compile Remove="Migrations\20221213164156_Cascade.Designer.cs" />
+    <Compile Remove="Migrations\MiContextoModelSnapshot.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Remove="Views\CajasDeAhorro\Create.cshtml" />
     <Content Remove="Views\CajasDeAhorro\Details.cshtml" />
     <Content Remove="Views\CajasDeAhorro\Edit.cshtml" />
@@ -38,6 +56,10 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Migrations\" />
   </ItemGroup>
 
 </Project>

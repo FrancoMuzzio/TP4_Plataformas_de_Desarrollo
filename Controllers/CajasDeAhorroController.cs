@@ -61,6 +61,58 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
             return RedirectToAction("Index", "CajasDeAhorro");
         }
  
+        // GET: CajasDeAhorro/EliminarTitular/5
+        public async Task<IActionResult> EliminarTitular(int? id)
+        {
+            if (id == null || _context.cajas == null)
+            {
+                return NotFound();
+            }
+
+            var cajaDeAhorro = await _context.cajas
+                .FirstOrDefaultAsync(m => m.id == id);
+            if (cajaDeAhorro == null)
+            {
+                return NotFound();
+            }
+
+            return View(cajaDeAhorro);
+        }
+
+        // POST: CajasDeAhorro/EliminarTitular/5
+        [HttpPost, ActionName("EliminarTitular")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EliminarTitular(int id, int dni)
+        {
+            try
+            {
+                Usuario? titular = _context.usuarios.Where(usuario => usuario.dni == dni).FirstOrDefault();
+                CajaDeAhorro? caja = await _context.cajas.FindAsync(id);
+                Debug.WriteLine("TITULAR: "+titular);
+                Debug.WriteLine("CAJA: "+caja);
+                if (titular == null)
+                {
+                    return Problem("No se encontró usuario con este DNI en la lista de Usuarios del Banco.");                //No se encontró usuario con este DNI en la lista de Usuarios del Banco
+                }
+                if (caja == null)
+                {
+                    return Problem("No se encontró la caja de ahorro en la lista de cajas de ahorro.");                //No se encontró la caja de ahorro en la lista de cajas de ahorro
+                }
+                if (!caja.titulares.Contains(titular) || caja.titulares.Count < 2)
+                {
+                    return Problem("El usuario no se pudo eliminar de la lista en el sistema.");                // El usuario no se pudo eliminar de la lista en el sistema
+                }
+                caja.titulares.Remove(titular);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception e)
+            {
+                return Problem(e.ToString());
+            }
+
+        }
+
         // GET: CajasDeAhorro/AgregarTitular/5
         public async Task<IActionResult> AgregarTitular(int? id)
         {
@@ -91,11 +143,11 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
                 Usuario? userAdd = _context.usuarios.Where(usuario => usuario.dni == dni).FirstOrDefault();
                 if (userAdd == null)
                 {
-                    return Problem("No se encontró usuario con este DNI en la lista de Usuarios del Banco");                //No se encontró usuario con este DNI en la lista de Usuarios del Banco
+                    return Problem("No se encontró usuario con este DNI en la lista de Usuarios del Banco (" + dni + ")");                //No se encontró usuario con este DNI en la lista de Usuarios del Banco
                 }
                 if (caja == null)
                 {
-                    return Problem("No se encontró la caja de ahorro con ese ID");                   //No se encontró la caja de ahorro con ese ID
+                    return Problem("No se encontró la caja de ahorro con ese  (" + id + ")");                   //No se encontró la caja de ahorro con ese ID
                 }
 
                 if (caja.titulares.Contains(userAdd))
@@ -107,13 +159,109 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
                 _context.Update(caja);
                 _context.Update(userAdd);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index)); ;
+                return RedirectToAction(nameof(Index));
             }
             catch
             {
                 return Problem("Ocurrio un error.");
             }
 
+        }
+
+        // GET: CajasDeAhorro/Depositar/5
+        public async Task<IActionResult> Depositar(int? id)
+        {
+            if (id == null || _context.cajas == null)
+            {
+                return Problem("ID null or _context.cajas null");
+            }
+
+            var cajaDeAhorro = await _context.cajas
+                .FirstOrDefaultAsync(m => m.id == id);
+            if (cajaDeAhorro == null)
+            {
+                return Problem("No existe tal caja de ahorro");
+            }
+
+            return View(cajaDeAhorro);
+        }
+
+
+        // POST: CajasDeAhorro/Depositar/5
+        [HttpPost, ActionName("Depositar")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Depositar(int id, int monto)
+        {
+            try
+            {
+                CajaDeAhorro cajaDestino = await _context.cajas.FindAsync(id);
+                if (cajaDestino == null)
+                {
+                    return Problem("No se encuentra la Caja.");                              //Si no se encuentra la Caja    
+                }
+                cajaDestino.saldo += monto;
+                _context.Update(cajaDestino);
+                Movimiento movimientoNuevo = new Movimiento(cajaDestino, "Deposito", monto);
+                _context.movimientos.Add(movimientoNuevo);
+                cajaDestino.movimientos.Add(movimientoNuevo);
+                _context.Update(cajaDestino);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                return Problem("Error.");
+            }
+        }
+
+        // GET: CajasDeAhorro/Retirar/5
+        public async Task<IActionResult> Retirar(int? id)
+        {
+            if (id == null || _context.cajas == null)
+            {
+                return Problem("ID null or _context.cajas null");
+            }
+
+            var cajaDeAhorro = await _context.cajas
+                .FirstOrDefaultAsync(m => m.id == id);
+            if (cajaDeAhorro == null)
+            {
+                return Problem("No existe tal caja de ahorro");
+            }
+
+            return View(cajaDeAhorro);
+        }
+
+
+        // POST: CajasDeAhorro/Retirar/5
+        [HttpPost, ActionName("Retirar")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Retirar(int id, int monto)
+        {
+            try
+            {
+                CajaDeAhorro cajaDestino = await _context.cajas.FindAsync(id);
+                if (cajaDestino == null)
+                {
+                    return Problem("No se encontró la caja"); //No se encontró la caja
+                }
+                if (cajaDestino.saldo < monto)
+                {
+                    return Problem("El saldo es menor al monto que se desea retirar"); //El saldo es menor al monto que se desea retirar
+                }
+                cajaDestino.saldo -= monto;
+                _context.Update(cajaDestino);
+                Movimiento movimientoNuevo = new Movimiento(cajaDestino, "Retiro", monto);
+                _context.movimientos.Add(movimientoNuevo);
+                cajaDestino.movimientos.Add(movimientoNuevo);
+                _context.Update(cajaDestino);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                return Problem("Error.");
+            }
         }
 
 
@@ -156,7 +304,6 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
                     titular.cajas.Remove(cajaARemover);  //Saco la caja de ahorro de los titulares.
                 }
                 _context.cajas.Remove(cajaARemover); //Saco la caja de ahorro del banco
-
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }

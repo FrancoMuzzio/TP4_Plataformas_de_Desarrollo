@@ -1,32 +1,32 @@
 ﻿@model WebApplication_plataformas_de_desarrollo.Models.CajaDeAhorro
 
 @{
-    ViewData["Title"] = "Agregar titular a caja de ahorro";
+    ViewData["Title"] = "Eliminar titular de caja de ahorro";
 }
 
 <h1>Agregar titular a caja de ahorro</h1>
 
-<h3>¿Estas seguro que queres agregar un titular a esta caja de ahorro?</h3>
+<h3>¿Estas seguro que queres eliminar un titular de esta caja de ahorro?</h3>
 <div>
     <h4>Caja de ahorro</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.cbu)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.cbu)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.saldo)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.saldo)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.titulares)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @foreach (var titular in Model.titulares)
             {
                 var nombreTitular = titular.nombre.ToString() + " " + titular.apellido.ToString();
@@ -34,14 +34,14 @@
             }
         </dd>
     </dl>
-    
-    <form asp-action="AgregarTitular">
-      <div class="form-group">
-        <input type="hidden" asp-for="id" />
-        <label for="dni">DNI:</label>
-        <input type="number" class="form-control" name="dni" id="dni" placeholder="Dni del nuevo titular.">
-        <input type="submit" value="Agregar" class="btn btn-success" /> |
-        <a asp-action="Index">Volver</a>
-      </div>
+
+    <form asp-action="EliminarTitular">
+        <div class="form-group">
+            <input type="hidden" asp-for="id" />
+            <label for="dni">DNI:</label>
+            <input type="number" class="form-control" name="dni" id="dni" placeholder="Dni del titular a eliminar.">
+            <input type="submit" value="Eliminar" class="btn btn-success" /> |
+            <a asp-action="Index">Volver</a>
+        </div>
     </form>
 </div>

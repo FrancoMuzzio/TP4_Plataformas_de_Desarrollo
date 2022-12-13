@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace WebApplicationplataformasdedesarrollo.Migrations
 {
     /// <inheritdoc />
-    public partial class inicial : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -65,8 +65,7 @@ namespace WebApplicationplataformasdedesarrollo.Migrations
                         name: "FK_Movimiento_CajaAhorro_id_Caja",
                         column: x => x.idCaja,
                         principalTable: "CajaAhorro",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "id");
                 });
 
             migrationBuilder.CreateTable(
@@ -88,8 +87,7 @@ namespace WebApplicationplataformasdedesarrollo.Migrations
                         name: "FK_Pago_Usuario_id_usuario",
                         column: x => x.idusuario,
                         principalTable: "Usuario",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "id");
                 });
 
             migrationBuilder.CreateTable(
@@ -113,8 +111,7 @@ namespace WebApplicationplataformasdedesarrollo.Migrations
                         name: "FK_PlazoFijo_Usuario_id_titular",
                         column: x => x.idtitular,
                         principalTable: "Usuario",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "id");
                 });
 
             migrationBuilder.CreateTable(
@@ -136,8 +133,7 @@ namespace WebApplicationplataformasdedesarrollo.Migrations
                         name: "FK_Tarjeta_Usuario_id_titular",
                         column: x => x.idtitular,
                         principalTable: "Usuario",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "id");
                 });
 
             migrationBuilder.CreateTable(

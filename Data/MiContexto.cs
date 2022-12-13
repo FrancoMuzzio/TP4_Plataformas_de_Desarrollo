@@ -60,8 +60,8 @@ namespace WebApplication_plataformas_de_desarrollo.Data
                 .HasMany(U => U.cajas)
                 .WithMany(C => C.titulares)
             .UsingEntity<UsuarioCaja>(
-                euc => euc.HasOne(uc => uc.caja).WithMany(c => c.usuarioCajas).HasForeignKey(uc => uc.idCaja),
-                euc => euc.HasOne(uc => uc.usuario).WithMany(u => u.usuarioCajas).HasForeignKey(uc => uc.idUsuario),
+                euc => euc.HasOne(uc => uc.caja).WithMany(c => c.usuarioCajas).HasForeignKey(uc => uc.idCaja).OnDelete(DeleteBehavior.Cascade),
+                euc => euc.HasOne(uc => uc.usuario).WithMany(u => u.usuarioCajas).HasForeignKey(uc => uc.idUsuario).OnDelete(DeleteBehavior.Cascade),
                 euc => euc.HasKey(k => new { k.idUsuario, k.idCaja })
             );
 
@@ -69,25 +69,21 @@ namespace WebApplication_plataformas_de_desarrollo.Data
                 .HasOne(pf => pf.titular)
                 .WithMany(u => u.pf)
                 .HasForeignKey(pf => pf.id_titular)
-                .OnDelete(DeleteBehavior.Cascade)
                 .IsRequired(false);
             modelBuilder.Entity<Movimiento>()
                 .HasOne(mov => mov.caja)
                 .WithMany(caja => caja.movimientos)
                 .HasForeignKey(m => m.id_Caja)
-                .OnDelete(DeleteBehavior.Cascade)
                 .IsRequired(false);
             modelBuilder.Entity<Pago>()
                 .HasOne(p => p.usuario)
                 .WithMany(u => u.pagos)
                 .HasForeignKey(p => p.id_usuario)
-                .OnDelete(DeleteBehavior.Cascade)
                 .IsRequired(false);
             modelBuilder.Entity<Tarjeta>()
                 .HasOne(t => t.titular)
                 .WithMany(u => u.tarjetas)
                 .HasForeignKey(t => t.id_titular)
-                .OnDelete(DeleteBehavior.Cascade)
                 .IsRequired(false);
 
             //Seteo de datos

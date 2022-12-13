@@ -360,8 +360,7 @@ namespace WebApplicationplataformasdedesarrollo.Migrations
                 {
                     b.HasOne("WebApplication_plataformas_de_desarrollo.Models.CajaDeAhorro", "caja")
                         .WithMany("movimientos")
-                        .HasForeignKey("id_Caja")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("id_Caja");
 
                     b.Navigation("caja");
                 });
@@ -370,8 +369,7 @@ namespace WebApplicationplataformasdedesarrollo.Migrations
                 {
                     b.HasOne("WebApplication_plataformas_de_desarrollo.Models.Usuario", "usuario")
                         .WithMany("pagos")
-                        .HasForeignKey("id_usuario")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("id_usuario");
 
                     b.Navigation("usuario");
                 });
@@ -380,8 +378,7 @@ namespace WebApplicationplataformasdedesarrollo.Migrations
                 {
                     b.HasOne("WebApplication_plataformas_de_desarrollo.Models.Usuario", "titular")
                         .WithMany("pf")
-                        .HasForeignKey("id_titular")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("id_titular");
 
                     b.Navigation("titular");
                 });
@@ -390,8 +387,7 @@ namespace WebApplicationplataformasdedesarrollo.Migrations
                 {
                     b.HasOne("WebApplication_plataformas_de_desarrollo.Models.Usuario", "titular")
                         .WithMany("tarjetas")
-                        .HasForeignKey("id_titular")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("id_titular");
 
                     b.Navigation("titular");
                 });
