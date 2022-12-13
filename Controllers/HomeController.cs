@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using System.Net;
@@ -12,15 +13,30 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         private readonly MiContexto _context;
         private Usuario? usuarioLogueado;
 
-        public HomeController(MiContexto context)
+        public HomeController(MiContexto context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            usuarioLogueado = _context.usuarios.Where(u => u.id == httpContextAccessor.HttpContext.Session.GetInt32("IdUsuario")).FirstOrDefault();
+            _context.usuarios
+            .Include(u => u.tarjetas)
+            .Include(u => u.cajas)
+            .Include(u => u.pf)
+            .Include(u => u.pagos)
+            .Load();
+                _context.cajas
+                    .Include(c => c.movimientos)
+                    .Include(c => c.titulares)
+                    .Load();
+                _context.tarjetas.Load();
+                _context.pagos.Load();
+                _context.movimientos.Load();
+                _context.plazosFijos.Load();
         }
 
         public IActionResult Index()
         {
             var sessionUserId = HttpContext.Session.GetInt32("IdUsuario");
-            ViewData["mensaje"] = (sessionUserId != null && usuarioLogueado != null) ? "Bienvenido "+ usuarioLogueado.nombre + " " + usuarioLogueado.apellido : "Inicia sesión para continuar";
+            ViewData["mensaje"] = (sessionUserId != null && usuarioLogueado != null) ? "Bienvenido " + usuarioLogueado.nombre + " " + usuarioLogueado.apellido : "Inicia sesión para continuar";
             return View();
         }
 
@@ -47,7 +63,6 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
                 }
                 HttpContext.Session.SetInt32("IdUsuario",usuario.id);
                 HttpContext.Session.SetInt32("IsAdmin", usuario.isAdmin ? 1 : 0);
-                usuarioLogueado = _context.usuarios.Where(u => u.id == usuario.id).FirstOrDefault();
                 return RedirectToAction("Index", "Home"); //Usuario logueado
             }
             catch
