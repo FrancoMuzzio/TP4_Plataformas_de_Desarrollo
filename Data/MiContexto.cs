@@ -30,6 +30,7 @@ namespace WebApplication_plataformas_de_desarrollo.Data
 
             var connectionString = configuration.GetConnectionString("MiContexto");
             optionsBuilder.UseSqlServer(connectionString);
+            optionsBuilder.EnableSensitiveDataLogging();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
