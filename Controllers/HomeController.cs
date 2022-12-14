@@ -40,11 +40,6 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
             return View();
         }
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
@@ -59,7 +54,7 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
                 var usuario = _context.usuarios.Where(u => u.dni == dni && u.password == password).FirstOrDefault();
                 if (usuario == null)
                 {
-                    return View(); //Usuario inexistente
+                    return Problem("Usuario inexistente"); //Usuario inexistente
                 }
                 HttpContext.Session.SetInt32("IdUsuario",usuario.id);
                 HttpContext.Session.SetInt32("IsAdmin", usuario.isAdmin ? 1 : 0);

@@ -40,6 +40,7 @@
             <input type="hidden" asp-for="id" />
             <label for="monto">Monto:</label>
             <input type="number" class="form-control" name="monto" id="monto" placeholder="Monto a retirar">
+            <p class="text-danger">@ViewData["mensaje"]</p>
             <input type="submit" value="Retirar" class="btn btn-success" /> |
             <a asp-action="Index">Volver</a>
         </div>

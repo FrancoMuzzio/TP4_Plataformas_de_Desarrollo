@@ -40,12 +40,27 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         // GET: CajasDeAhorro
         public async Task<IActionResult> Index()
         {
-              return View(await _context.cajas.ToListAsync());
+            if (usuarioLogueado == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            if (usuarioLogueado.isAdmin)
+            {
+                return View(await _context.cajas.ToListAsync());
+            }
+            else
+            {
+                return View(await _context.cajas.Where(c => c.titulares.Contains(usuarioLogueado)).ToListAsync());
+            }
         }
 
         // GET: CajasDeAhorro/Create
         public IActionResult Create()
         {
+            if (usuarioLogueado == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             Random random = new Random();
             int nuevoCbu = random.Next(100000000, 999999999);
             while (_context.cajas.Any(caja => caja.cbu == nuevoCbu))
@@ -62,8 +77,13 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         }
  
         // GET: CajasDeAhorro/EliminarTitular/5
-        public async Task<IActionResult> EliminarTitular(int? id)
+        public async Task<IActionResult> EliminarTitular(int? id, string mensaje = "")
         {
+            ViewData["mensaje"] = mensaje;
+            if (usuarioLogueado == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             if (id == null || _context.cajas == null)
             {
                 return NotFound();
@@ -84,6 +104,10 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EliminarTitular(int id, int dni)
         {
+            if (usuarioLogueado == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             try
             {
                 Usuario? titular = _context.usuarios.Where(usuario => usuario.dni == dni).FirstOrDefault();
@@ -92,15 +116,19 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
                 Debug.WriteLine("CAJA: "+caja);
                 if (titular == null)
                 {
-                    return Problem("No se encontró usuario con este DNI en la lista de Usuarios del Banco.");                //No se encontró usuario con este DNI en la lista de Usuarios del Banco
+                    return RedirectToAction("EliminarTitular", "CajasDeAhorro", new { mensaje = "No se encontró usuario con este DNI en la lista de Usuarios del Banco." });
                 }
                 if (caja == null)
                 {
-                    return Problem("No se encontró la caja de ahorro en la lista de cajas de ahorro.");                //No se encontró la caja de ahorro en la lista de cajas de ahorro
+                    return RedirectToAction("EliminarTitular", "CajasDeAhorro", new { mensaje = "No se encontró la caja de ahorro en la lista de cajas de ahorro." });
                 }
-                if (!caja.titulares.Contains(titular) || caja.titulares.Count < 2)
+                if (!caja.titulares.Contains(titular))
                 {
-                    return Problem("El usuario no se pudo eliminar de la lista en el sistema.");                // El usuario no se pudo eliminar de la lista en el sistema
+                    return RedirectToAction("EliminarTitular", "CajasDeAhorro", new { mensaje = "El usuario no es titular de esta caja de ahorro." });
+                }
+                if (caja.titulares.Count < 2)
+                {
+                    return RedirectToAction("EliminarTitular", "CajasDeAhorro", new { mensaje = "No puedes dejar la caja de ahorros sin titulares." });
                 }
                 caja.titulares.Remove(titular);
                 titular.cajas.Remove(caja);
@@ -118,8 +146,14 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         }
 
         // GET: CajasDeAhorro/AgregarTitular/5
-        public async Task<IActionResult> AgregarTitular(int? id)
+        public async Task<IActionResult> AgregarTitular(int? id, string mensaje = "")
         {
+            ViewData["mensaje"] = mensaje;
+            if (usuarioLogueado == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
             if (id == null || _context.cajas == null)
             {
                 return NotFound();
@@ -141,22 +175,27 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AgregarTitular(int id, int dni)
         {
+            if (usuarioLogueado == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             try
             {
+
                 CajaDeAhorro? caja = await _context.cajas.FindAsync(id);
                 Usuario? userAdd = _context.usuarios.Where(usuario => usuario.dni == dni).FirstOrDefault();
                 if (userAdd == null)
                 {
-                    return Problem("No se encontró usuario con este DNI en la lista de Usuarios del Banco (" + dni + ")");                //No se encontró usuario con este DNI en la lista de Usuarios del Banco
+                    return RedirectToAction("AgregarTitular", "CajasDeAhorro", new { mensaje = "No se encontró usuario con este DNI en la lista de Usuarios del Banco (" + dni + ")" });                
                 }
                 if (caja == null)
                 {
-                    return Problem("No se encontró la caja de ahorro con ese  (" + id + ")");                   //No se encontró la caja de ahorro con ese ID
+                    return RedirectToAction("AgregarTitular", "CajasDeAhorro", new { mensaje = "No se encontró la caja de ahorro con ese  (" + id + ")" });              
                 }
 
                 if (caja.titulares.Contains(userAdd))
                 {
-                    return Problem("El usuario ya posee esta caja de ahorro en el sistema.");                      //El usuario ya posee esta caja de ahorro en el sistema.
+                    return RedirectToAction("AgregarTitular", "CajasDeAhorro", new { mensaje = "El usuario ya es titular de esta caja de ahorro." });
                 }
                 caja.titulares.Add(userAdd);
                 userAdd.cajas.Add(caja);
@@ -173,18 +212,23 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         }
 
         // GET: CajasDeAhorro/Depositar/5
-        public async Task<IActionResult> Depositar(int? id)
+        public async Task<IActionResult> Depositar(int? id, string mensaje = "")
         {
+            ViewData["mensaje"] = mensaje;
+            if (usuarioLogueado == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             if (id == null || _context.cajas == null)
             {
-                return Problem("ID null or _context.cajas null");
+                return Problem("ID null or _context.cajas null.");
             }
 
             var cajaDeAhorro = await _context.cajas
                 .FirstOrDefaultAsync(m => m.id == id);
             if (cajaDeAhorro == null)
             {
-                return Problem("No existe tal caja de ahorro");
+                return Problem("Caja de ahorro inexistente.");
             }
 
             return View(cajaDeAhorro);
@@ -196,12 +240,16 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Depositar(int id, int monto)
         {
+            if (usuarioLogueado == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             try
             {
                 CajaDeAhorro cajaDestino = await _context.cajas.FindAsync(id);
                 if (cajaDestino == null)
                 {
-                    return Problem("No se encuentra la Caja.");                              //Si no se encuentra la Caja    
+                    return RedirectToAction("Depositar", "CajasDeAhorro", new { mensaje = "Caja de ahorro inexistente." });
                 }
                 cajaDestino.saldo += monto;
                 _context.Update(cajaDestino);
@@ -219,8 +267,13 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         }
 
         // GET: CajasDeAhorro/Retirar/5
-        public async Task<IActionResult> Retirar(int? id)
+        public async Task<IActionResult> Retirar(int? id, string mensaje = "")
         {
+            ViewData["mensaje"] = mensaje;
+            if (usuarioLogueado == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             if (id == null || _context.cajas == null)
             {
                 return Problem("ID null or _context.cajas null");
@@ -242,16 +295,20 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Retirar(int id, int monto)
         {
+            if (usuarioLogueado == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             try
             {
                 CajaDeAhorro cajaDestino = await _context.cajas.FindAsync(id);
                 if (cajaDestino == null)
                 {
-                    return Problem("El saldo es menor al monto que se desea retirar"); //No se encontró la caja
+                    return RedirectToAction("Retirar", "CajasDeAhorro", new { mensaje = "No se encontro la caja de ahorro." });
                 }
                 if (cajaDestino.saldo < monto)
                 {
-                    return Problem("El saldo es menor al monto que se desea retirar"); //El saldo es menor al monto que se desea retirar
+                    return RedirectToAction("Retirar", "CajasDeAhorro", new { mensaje = "El saldo es menor al monto que se desea retirar." });
                 }
                 cajaDestino.saldo -= monto;
                 _context.Update(cajaDestino);
@@ -268,8 +325,13 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
             }
         }
         // GET: CajasDeAhorro/Transferir/5
-        public async Task<IActionResult> Transferir(int? id)
+        public async Task<IActionResult> Transferir(int? id, string mensaje = "")
         {
+            ViewData["mensaje"] = mensaje;
+            if (usuarioLogueado == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             if (id == null || _context.cajas == null)
             {
                 return Problem("ID null or _context.cajas null");
@@ -291,17 +353,21 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Transferir(int id, int monto, int cbu)
         {
+            if (usuarioLogueado == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             try
             {
                 CajaDeAhorro cajaOrigen = await _context.cajas.FindAsync(id);
                 CajaDeAhorro cajaDestino = _context.cajas.Where(caja => caja.cbu == cbu).FirstOrDefault();
-                if (cajaDestino == null)
-                {
-                    return Problem("No se encontro caja destino");
-                }
                 if (cajaOrigen.saldo < monto)
                 {
-                    return Problem("El monto es mayor que el saldo de la caja");
+                    return RedirectToAction("Transferir", "CajasDeAhorro", new { mensaje = "El monto es mayor que el saldo de la caja." });
+                }
+                if (cajaDestino == null)
+                {
+                    return RedirectToAction("Transferir", "CajasDeAhorro", new { mensaje = "No se encontro caja destino." });
                 }
                 cajaOrigen.saldo -= monto;
                 Movimiento movimientoNuevo = new Movimiento(cajaOrigen, "Transferencia realizada", monto);
@@ -323,8 +389,13 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         }
 
         // GET: CajasDeAhorro/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int? id, string mensaje = "")
         {
+            ViewData["mensaje"] = mensaje;
+            if (usuarioLogueado == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             if (id == null || _context.cajas == null)
             {
                 return NotFound();
@@ -345,16 +416,20 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            if (usuarioLogueado == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             try
             {
                 CajaDeAhorro? cajaARemover = await _context.cajas.FindAsync(id);
                 if (cajaARemover == null)
                 {
-                    return Problem("No existe caja.");
+                    return RedirectToAction("Delete", "CajasDeAhorro", new { mensaje = "No existe caja." });
                 }
                 if (cajaARemover.saldo != 0)
                 {
-                    return Problem("Tiene saldo, no se puede eliminar.");
+                    return RedirectToAction("Delete", "CajasDeAhorro", new { mensaje = "Tiene saldo, no se puede eliminar." });
                 }
                 foreach (Usuario titular in cajaARemover.titulares) 
                 {
@@ -372,8 +447,13 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         }
 
         // GET: CajasDeAhorro/Movimientos/5
-        public async Task<IActionResult> Movimientos(int? id)
+        public async Task<IActionResult> Movimientos(int? id, string mensaje = "")
         {
+            ViewData["mensaje"] = mensaje;
+            if (usuarioLogueado == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             if (id == null || _context.cajas == null)
             {
                 return NotFound();
@@ -388,6 +468,7 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
 
             return View(cajaDeAhorro);
         }
+
     }
 
 }

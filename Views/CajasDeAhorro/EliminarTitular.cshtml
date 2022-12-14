@@ -40,6 +40,7 @@
             <input type="hidden" asp-for="id" />
             <label for="dni">DNI:</label>
             <input type="number" class="form-control" name="dni" id="dni" placeholder="Dni del titular a eliminar.">
+            <p class="text-danger">@ViewData["mensaje"]</p>
             <input type="submit" value="Eliminar" class="btn btn-success" /> |
             <a asp-action="Index">Volver</a>
         </div>
