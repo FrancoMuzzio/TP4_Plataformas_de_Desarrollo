@@ -1,13 +1,13 @@
 ﻿@model IEnumerable<WebApplication_plataformas_de_desarrollo.Models.PlazoFijo>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Plazos fijos";
 }
 
-<h1>Index</h1>
+<h1>Plazos fijos</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a type="button" class="btn btn-dark" asp-action="Create">Nuevo plazo fijo</a>
 </p>
 <table class="table">
     <thead>
@@ -23,12 +23,6 @@
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.tasa)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.pagado)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.titular)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.cbu)
@@ -52,18 +46,13 @@
                 @Html.DisplayFor(modelItem => item.tasa)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.pagado)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.titular.apellido)
-            </td>
-            <td>
                 @Html.DisplayFor(modelItem => item.cbu)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.id">Delete</a>
+                @if (item.pagado)
+                {
+                    <a type="button" class="btn btn-dark" asp-action="Delete" asp-route-id="@item.id">Delete</a>
+                }
             </td>
         </tr>
 }

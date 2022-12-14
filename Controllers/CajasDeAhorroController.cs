@@ -134,7 +134,6 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
                 titular.cajas.Remove(caja);
                 _context.Update(caja);
                 _context.Update(titular);
-
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -153,12 +152,10 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
             {
                 return RedirectToAction("Index", "Home");
             }
-
             if (id == null || _context.cajas == null)
             {
                 return NotFound();
             }
-
             var cajaDeAhorro = await _context.cajas
                 .FirstOrDefaultAsync(m => m.id == id);
             if (cajaDeAhorro == null)
