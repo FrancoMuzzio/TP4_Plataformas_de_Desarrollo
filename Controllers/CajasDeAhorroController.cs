@@ -103,6 +103,10 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
                     return Problem("El usuario no se pudo eliminar de la lista en el sistema.");                // El usuario no se pudo eliminar de la lista en el sistema
                 }
                 caja.titulares.Remove(titular);
+                titular.cajas.Remove(caja);
+                _context.Update(caja);
+                _context.Update(titular);
+
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
