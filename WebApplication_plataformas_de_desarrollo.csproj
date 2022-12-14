@@ -31,6 +31,9 @@
     <Content Remove="Views\Home\Index - Copia.cshtml" />
     <Content Remove="Views\Home\Index1.cshtml" />
     <Content Remove="Views\Home\Privacy.cshtml" />
+    <Content Remove="Views\Tarjetas\Create.cshtml" />
+    <Content Remove="Views\Tarjetas\Details.cshtml" />
+    <Content Remove="Views\Tarjetas\Edit.cshtml" />
   </ItemGroup>
 
   <ItemGroup>

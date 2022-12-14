@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -13,114 +15,77 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
     public class TarjetasController : Controller
     {
         private readonly MiContexto _context;
+        private Usuario? usuarioLogueado;
 
-        public TarjetasController(MiContexto context)
+        public TarjetasController(MiContexto context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+
+        
+               
+           
+                    _context.usuarios
+                    .Include(u => u.tarjetas)
+                    .Include(u => u.cajas)
+                    .Include(u => u.pf)
+                    .Include(u => u.pagos)
+                    .Load();
+            _context.cajas
+                .Include(c => c.movimientos)
+                .Include(c => c.titulares)
+                .Load();
+            _context.tarjetas.Load();
+            _context.pagos.Load();
+            _context.movimientos.Load();
+            _context.plazosFijos.Load();
+            usuarioLogueado = _context.usuarios.Where(u => u.id == httpContextAccessor.HttpContext.Session.GetInt32("IdUsuario")).FirstOrDefault();
         }
 
         // GET: Tarjetas
         public async Task<IActionResult> Index()
         {
-            var miContexto = _context.tarjetas.Include(t => t.titular);
-            return View(await miContexto.ToListAsync());
+            if (usuarioLogueado == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            if (usuarioLogueado.isAdmin)
+            {
+                return View(await _context.tarjetas.ToListAsync());
+            }
+            else
+            {
+                return View(await _context.tarjetas.Where(c => c.titular==usuarioLogueado).ToListAsync());
+            }
         }
 
-        // GET: Tarjetas/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null || _context.tarjetas == null)
-            {
-                return NotFound();
-            }
-
-            var tarjeta = await _context.tarjetas
-                .Include(t => t.titular)
-                .FirstOrDefaultAsync(m => m.id == id);
-            if (tarjeta == null)
-            {
-                return NotFound();
-            }
-
-            return View(tarjeta);
-        }
-
-        // GET: Tarjetas/Create
+       //get
         public IActionResult Create()
         {
-            ViewData["id_titular"] = new SelectList(_context.usuarios, "id", "apellido");
-            return View();
-        }
-
-        // POST: Tarjetas/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("id,id_titular,numero,codigoV,limite,consumo")] Tarjeta tarjeta)
-        {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(tarjeta);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["id_titular"] = new SelectList(_context.usuarios, "id", "apellido", tarjeta.id_titular);
-            return View(tarjeta);
-        }
-
-        // GET: Tarjetas/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null || _context.tarjetas == null)
-            {
-                return NotFound();
-            }
-
-            var tarjeta = await _context.tarjetas.FindAsync(id);
-            if (tarjeta == null)
-            {
-                return NotFound();
-            }
-            ViewData["id_titular"] = new SelectList(_context.usuarios, "id", "apellido", tarjeta.id_titular);
-            return View(tarjeta);
-        }
-
-        // POST: Tarjetas/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("id,id_titular,numero,codigoV,limite,consumo")] Tarjeta tarjeta)
-        {
-            if (id != tarjeta.id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(tarjeta);
-                    await _context.SaveChangesAsync();
+                Random random = new Random();
+                int nuevoNumero = random.Next(100000000, 999999999);
+                while (_context.tarjetas.Any(tarjeta => tarjeta.numero == nuevoNumero))
+                {  // Mientras haya alguna tarjeta con ese numero se crea otro numero
+                    nuevoNumero = random.Next(100000000, 999999999);
+                    Debug.WriteLine("El número de tarjeta generado ya existe, creado uno nuevo...");
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!TarjetaExists(tarjeta.id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                int nuevoCodigo = random.Next(100, 999); //Creo un codigo de tarjeta aleatorio
+                Tarjeta nuevo = new Tarjeta(usuarioLogueado.id, nuevoNumero, nuevoCodigo, 20000, 0);
+                nuevo.titular = usuarioLogueado;
+                _context.tarjetas.Add(nuevo);
+                _context.Update(usuarioLogueado);
+                _context.SaveChanges();
+                return RedirectToAction("Index", "Tarjetas");
+             //   return Problem;
+
             }
-            ViewData["id_titular"] = new SelectList(_context.usuarios, "id", "apellido", tarjeta.id_titular);
-            return View(tarjeta);
+            catch
+            {
+                return Problem();
+            }
         }
+
 
         // GET: Tarjetas/Delete/5
         public async Task<IActionResult> Delete(int? id)
@@ -146,18 +111,30 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.tarjetas == null)
+            try
             {
-                return Problem("Entity set 'MiContexto.tarjetas'  is null.");
+                Tarjeta? tarjetaARemover = await _context.tarjetas.FindAsync(id);
+                if (tarjetaARemover == null)
+                {
+                    return Problem();
+                }
+                if (tarjetaARemover.consumo != 0) // La condición para eliminar es que no tenga consumos sin pagar.
+                {
+                    return Problem();
+                }
+                _context.tarjetas.Remove(tarjetaARemover); //Borro la tarjeta de la lista de tarjetas del Banco
+                tarjetaARemover.titular.tarjetas.Remove(tarjetaARemover);//Borro la tarjeta de la lista de tarjetas del usuario.
+                _context.Update(tarjetaARemover.titular);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+                // return true;
             }
-            var tarjeta = await _context.tarjetas.FindAsync(id);
-            if (tarjeta != null)
+            catch
             {
-                _context.tarjetas.Remove(tarjeta);
+                return Problem("Error.");
             }
-            
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+
         }
 
         private bool TarjetaExists(int id)
