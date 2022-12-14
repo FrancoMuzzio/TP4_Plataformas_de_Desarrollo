@@ -21,10 +21,7 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         {
             _context = context;
 
-        
-               
-           
-                    _context.usuarios
+            _context.usuarios
                     .Include(u => u.tarjetas)
                     .Include(u => u.cajas)
                     .Include(u => u.pf)
@@ -61,6 +58,11 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
        //get
         public IActionResult Create()
         {
+
+            if (usuarioLogueado == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             try
             {
                 Random random = new Random();
@@ -88,22 +90,29 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
 
 
         // GET: Tarjetas/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int? id, string mensaje = "")
         {
-            if (id == null || _context.tarjetas == null)
+            ViewData["mensaje"] = mensaje;
+            if (usuarioLogueado == null)
             {
-                return NotFound();
+                return RedirectToAction("Index", "Home");
             }
-
-            var tarjeta = await _context.tarjetas
-                .Include(t => t.titular)
-                .FirstOrDefaultAsync(m => m.id == id);
-            if (tarjeta == null)
             {
-                return NotFound();
-            }
+                if (id == null || _context.tarjetas == null)
+                {
+                    return NotFound();
+                }
 
-            return View(tarjeta);
+                var tarjeta = await _context.tarjetas
+                    .Include(t => t.titular)
+                    .FirstOrDefaultAsync(m => m.id == id);
+                if (tarjeta == null)
+                {
+                    return NotFound();
+                }
+
+                return View(tarjeta);
+            }
         }
 
         // POST: Tarjetas/Delete/5
@@ -111,16 +120,23 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            if (usuarioLogueado == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
             try
             {
                 Tarjeta? tarjetaARemover = await _context.tarjetas.FindAsync(id);
                 if (tarjetaARemover == null)
                 {
-                    return Problem();
+                    return RedirectToAction("Delete", "Tarjetas", new { mensaje = "No existe la tarjeta." });
+
                 }
                 if (tarjetaARemover.consumo != 0) // La condición para eliminar es que no tenga consumos sin pagar.
                 {
-                    return Problem();
+                    return RedirectToAction("Delete", "Tarjetas", new { mensaje = "Para eliminar no debe tener consumos sin pagar" });
+
                 }
                 _context.tarjetas.Remove(tarjetaARemover); //Borro la tarjeta de la lista de tarjetas del Banco
                 tarjetaARemover.titular.tarjetas.Remove(tarjetaARemover);//Borro la tarjeta de la lista de tarjetas del usuario.
@@ -137,9 +153,6 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
 
         }
 
-        private bool TarjetaExists(int id)
-        {
-          return _context.tarjetas.Any(e => e.id == id);
-        }
+      
     }
 }
