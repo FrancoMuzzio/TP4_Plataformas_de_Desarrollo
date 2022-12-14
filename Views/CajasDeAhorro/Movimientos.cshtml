@@ -1,14 +1,11 @@
 ﻿@model WebApplication_plataformas_de_desarrollo.Models.CajaDeAhorro
 
 @{
-    ViewData["Title"] = "Transferir a caja de ahorro";
+    ViewData["Title"] = "Movimientos";
 }
 
-<h1>Transferir a caja de ahorro</h1>
-
-<h3>¿Estas seguro que queres transferir desde esta caja de ahorro?</h3>
+<h1>Movimientos</h1>
 <div>
-    <h4>Caja de ahorro</h4>
     <hr />
     <dl class="row">
         <dt class="col-sm-2">
@@ -25,6 +22,16 @@
         </dd>
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.titulares)
+        </dt>
+        <dd class="col-sm-10">
+            @foreach (var titular in Model.titulares)
+            {
+                var nombreTitular = titular.nombre.ToString() + " " + titular.apellido.ToString();
+                <li>@nombreTitular</li>
+            }
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.movimientos)
         </dt>
         <dd class="col-sm-10">
             @foreach (var movimiento in Model.movimientos)

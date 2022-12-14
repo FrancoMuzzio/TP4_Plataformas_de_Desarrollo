@@ -34,6 +34,7 @@
     <Content Remove="Views\Tarjetas\Create.cshtml" />
     <Content Remove="Views\Tarjetas\Details.cshtml" />
     <Content Remove="Views\Tarjetas\Edit.cshtml" />
+    <Content Remove="web.config" />
   </ItemGroup>
 
   <ItemGroup>

@@ -32,7 +32,6 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
                 _context.movimientos.Load();
                 _context.plazosFijos.Load();
         }
-
         public IActionResult Index()
         {
             var sessionUserId = HttpContext.Session.GetInt32("IdUsuario");
@@ -54,11 +53,11 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
                 var usuario = _context.usuarios.Where(u => u.dni == dni && u.password == password).FirstOrDefault();
                 if (usuario == null)
                 {
-                    return Problem("Usuario inexistente"); //Usuario inexistente
+                    return RedirectToAction("Login", "Home", new { mensaje = "Datos incorrectos." });
                 }
                 HttpContext.Session.SetInt32("IdUsuario",usuario.id);
                 HttpContext.Session.SetInt32("IsAdmin", usuario.isAdmin ? 1 : 0);
-                return RedirectToAction("Index", "Home"); //Usuario logueado
+                return RedirectToAction("Pagar", "PlazosFijos");
             }
             catch
             {
@@ -67,8 +66,9 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         }
 
         [HttpGet]
-        public IActionResult Login()
+        public IActionResult Login(string mensaje = "")
         {
+            ViewData["mensaje"] = mensaje;
             return View();
         }
 

@@ -16,13 +16,7 @@
                 @Html.DisplayNameFor(model => model.monto)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.fechaIni)
-            </th>
-            <th>
                 @Html.DisplayNameFor(model => model.fechaFin)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.tasa)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.cbu)
@@ -32,18 +26,12 @@
     </thead>
     <tbody>
 @foreach (var item in Model) {
-        <tr>
+            <tr class="text-@(item.pagado?"muted":"dark")">
             <td>
                 @Html.DisplayFor(modelItem => item.monto)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.fechaIni)
-            </td>
-            <td>
                 @Html.DisplayFor(modelItem => item.fechaFin)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.tasa)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.cbu)
@@ -51,7 +39,7 @@
             <td>
                 @if (item.pagado)
                 {
-                    <a type="button" class="btn btn-dark" asp-action="Delete" asp-route-id="@item.id">Delete</a>
+                    <a type="button" class="btn btn-dark  btn-sm" asp-action="Delete" asp-route-id="@item.id">Eliminar</a>
                 }
             </td>
         </tr>

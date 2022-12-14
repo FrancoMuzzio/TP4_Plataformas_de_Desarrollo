@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -43,18 +44,29 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
             {
                 return RedirectToAction("Index", "Home");
             }
-            var miContexto = _context.plazosFijos.Include(p => p.titular);
-            return View(await miContexto.ToListAsync());
+            if (usuarioLogueado.isAdmin)
+            {
+                return View(await _context.plazosFijos.OrderBy(pf => pf.pagado).ToListAsync());
+            }
+            else
+            {
+                return View(await _context.plazosFijos.Where(c => c.titular == usuarioLogueado).OrderBy(pf => pf.pagado).ToListAsync());
+            }
         }
 
         // GET: PlazosFijos/Create
-        public IActionResult Create()
+        public IActionResult Create(string mensaje = "")
         {
+            ViewData["mensaje"] = mensaje;
             if (usuarioLogueado == null)
             {
                 return RedirectToAction("Index", "Home");
             }
-            ViewBag.Cajas = new SelectList(usuarioLogueado.cajas);
+            ViewBag.Cajas = new SelectList(usuarioLogueado.cajas.Select(c=> new
+            {
+                cbu = c.cbu,
+                text_to_show = "CBU: "+c.cbu+" - Saldo: "+c.saldo
+            }), "cbu", "text_to_show");
             return View();
         }
 
@@ -65,24 +77,27 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(int monto, int cbu)
         {
+
             if (usuarioLogueado == null)
             {
                 return RedirectToAction("Create", "Home");
             }
             try
             {
+                Debug.WriteLine("MONTO: " + monto);
+                Debug.WriteLine("CBU: "+ cbu);
                 if (monto < 1000)
                 {
-                    return RedirectToAction("Depositar", "PlazosFijos", new { mensaje = "Monto insuficiente para crear el pf." });
+                    return RedirectToAction("Create", "PlazosFijos", new { mensaje = "Monto insuficiente para crear el plazo fijo." });
                 }
                 CajaDeAhorro? caja = _context.cajas.Where(caja => caja.cbu == cbu).FirstOrDefault();
                 if (caja == null)
                 {
-                    return RedirectToAction("Depositar", "PlazosFijos", new { mensaje = "No se encontró la caja." });
+                    return RedirectToAction("Create", "PlazosFijos", new { mensaje = "No se encontró la caja." });
                 }
                 if (caja.saldo < monto)
                 {
-                    return RedirectToAction("Depositar", "PlazosFijos", new { mensaje = "Fondos insuficientes." });
+                    return RedirectToAction("Create", "PlazosFijos", new { mensaje = "Fondos insuficientes." });
                 }
                 caja.saldo -= monto;
                 Movimiento movimientoNuevo = new Movimiento(caja, "Alta plazo fijo", monto);
@@ -103,8 +118,9 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         }
 
         // GET: PlazosFijos/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int? id, string mensaje = "")
         {
+            ViewData["mensaje"] = mensaje;
             if (usuarioLogueado == null)
             {
                 return RedirectToAction("Index", "Home");
@@ -136,7 +152,7 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
             }
             if (_context.plazosFijos == null)
             {
-                return Problem("Entity set 'MiContexto.plazosFijos'  is null.");
+                return RedirectToAction("Delete", "PlazosFijos", new { mensaje = "Entity set 'MiContexto.plazosFijos'  is null.." });
             }
             var plazoFijo = await _context.plazosFijos.FindAsync(id);
             if (plazoFijo != null)
@@ -146,6 +162,33 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
             
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> Pagar()
+        {
+
+            foreach (PlazoFijo pFijo in usuarioLogueado.pf.Where(p=>p.fechaFin < DateTime.Today && !p.pagado))
+            {
+                DateTime fechaIni = pFijo.fechaIni;
+                DateTime fechaFin = pFijo.fechaFin;
+                if (DateTime.Now.CompareTo(fechaFin) >= 0 && pFijo.pagado == false) //Esto no se si va a alreves
+                {
+                    double cantDias = (fechaFin - fechaIni).TotalDays;
+                    float montoFinal = (pFijo.monto + pFijo.monto * (float)(90.0 / 365.0) * (float)cantDias);
+                    decimal bar = Convert.ToDecimal(montoFinal);
+                    montoFinal = (float)Math.Round(bar, 2);//redondeo a 2 decimales
+                    CajaDeAhorro caja = _context.cajas.Where(c => c.cbu == pFijo.cbu).FirstOrDefault();
+                    pFijo.pagado = true;
+                    caja.saldo += montoFinal;
+                    Movimiento movimientoNuevo = new Movimiento(caja, "Pago plazo fijo", montoFinal);
+                    _context.movimientos.Add(movimientoNuevo);
+                    caja.movimientos.Add(movimientoNuevo);
+                    _context.Update(pFijo);
+                    _context.Update(caja);
+                    await _context.SaveChangesAsync();
+                }
+            }
+            return RedirectToAction("Index", "Home");
         }
 
     }
