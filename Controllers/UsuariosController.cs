@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -13,21 +14,45 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
     public class UsuariosController : Controller
     {
         private readonly MiContexto _context;
+        private Usuario? usuarioLogueado;
 
-        public UsuariosController(MiContexto context)
+        public UsuariosController(MiContexto context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _context.usuarios
+                    .Include(u => u.tarjetas)
+                    .Include(u => u.cajas)
+                    .Include(u => u.pf)
+                    .Include(u => u.pagos)
+                    .Load();
+            _context.cajas
+                .Include(c => c.movimientos)
+                .Include(c => c.titulares)
+                .Load();
+            _context.tarjetas.Load();
+            _context.pagos.Load();
+            _context.movimientos.Load();
+            _context.plazosFijos.Load();
+            usuarioLogueado = _context.usuarios.Where(u => u.id == httpContextAccessor.HttpContext.Session.GetInt32("IdUsuario")).FirstOrDefault();
         }
 
         // GET: Usuarios
         public async Task<IActionResult> Index()
         {
-              return View(await _context.usuarios.ToListAsync());
+            if (usuarioLogueado == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            return View(await _context.usuarios.ToListAsync());
         }
 
         // GET: Usuarios/Details/5
         public async Task<IActionResult> Details(int? id)
         {
+            if (usuarioLogueado == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             if (id == null || _context.usuarios == null)
             {
                 return NotFound();
@@ -46,6 +71,10 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         // GET: Usuarios/Create
         public IActionResult Create()
         {
+            if (usuarioLogueado == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             return View();
         }
 
@@ -54,20 +83,40 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("id,dni,nombre,apellido,mail,intentosFallidos,bloqueado,password,isAdmin")] Usuario usuario)
+        public async Task<IActionResult> Create(int dni, string nombre, string apellido, string email, string password, string password2)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(usuario);
+                if(_context.usuarios.Where(u => u.dni == dni).FirstOrDefault()!=null)
+                {
+                    return (usuarioLogueado != null && usuarioLogueado.isAdmin) ? RedirectToAction(nameof(Index), new { mensaje = "Ya existe un usuario con ese DNI." }) : RedirectToAction("Registrarse", "Home", new { mensaje = "Ya existe un usuario con ese DNI." });
+                }
+                if(_context.usuarios.Where(u => u.mail == email).FirstOrDefault()!=null)
+                {
+                    return (usuarioLogueado != null && usuarioLogueado.isAdmin) ? RedirectToAction(nameof(Index), new { mensaje = "Ya existe un usuario con ese email." }) : RedirectToAction("Registrarse", "Home", new { mensaje = "Ya existe un usuario con ese email." });
+                }
+                if(password!=password2)
+                {
+                    return (usuarioLogueado != null && usuarioLogueado.isAdmin) ? RedirectToAction(nameof(Index), new { mensaje = "Las contraseñas no coinciden." }) : RedirectToAction("Registrarse", "Home", new { mensaje = "Las contraseñas no coinciden." });
+                }
+                Usuario nuevo = new Usuario(dni, nombre, apellido, email, password, 0, false, false);
+                _context.usuarios.Add(nuevo);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return (usuarioLogueado != null && usuarioLogueado.isAdmin) ? RedirectToAction(nameof(Index)) : RedirectToAction("Index", "Home");
             }
-            return View(usuario);
+            catch
+            {
+                return RedirectToAction(nameof(Index), new { mensaje = "Error al crear el usuario." });
+            }
         }
 
         // GET: Usuarios/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
+            if (usuarioLogueado == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             if (id == null || _context.usuarios == null)
             {
                 return NotFound();
@@ -88,6 +137,10 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("id,dni,nombre,apellido,mail,intentosFallidos,bloqueado,password,isAdmin")] Usuario usuario)
         {
+            if (usuarioLogueado == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             if (id != usuario.id)
             {
                 return NotFound();
@@ -119,6 +172,10 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         // GET: Usuarios/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
+            if (usuarioLogueado == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             if (id == null || _context.usuarios == null)
             {
                 return NotFound();
@@ -139,6 +196,10 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            if (usuarioLogueado == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             if (_context.usuarios == null)
             {
                 return Problem("Entity set 'MiContexto.usuarios'  is null.");
@@ -155,7 +216,8 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
 
         private bool UsuarioExists(int id)
         {
-          return _context.usuarios.Any(e => e.id == id);
+            return _context.usuarios.Any(e => e.id == id);
         }
+
     }
 }

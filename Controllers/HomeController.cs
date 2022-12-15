@@ -50,11 +50,35 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         {
             try
             {
-                var usuario = _context.usuarios.Where(u => u.dni == dni && u.password == password).FirstOrDefault();
+                var usuario = _context.usuarios.Where(u => u.dni == dni).FirstOrDefault();
                 if (usuario == null)
                 {
-                    return RedirectToAction("Login", "Home", new { mensaje = "Datos incorrectos." });
+                    return RedirectToAction("Login", "Home", new { mensaje = "No existe usuario con ese DNI." });
                 }
+                if (usuario.bloqueado)
+                {
+                    return RedirectToAction("Login", "Home", new { mensaje = "Ese usuario esta bloqueado." });
+                }
+                if (usuario.password != password)
+                {
+                    usuario.intentosFallidos++;
+                    _context.Update(usuario);
+                    _context.SaveChanges();
+                        if (usuario.intentosFallidos >= 3)           
+                        {
+                            usuario.bloqueado = true;
+                            _context.Update(usuario);
+                            _context.SaveChanges();
+                            return RedirectToAction("Login", "Home", new { mensaje = "Numero de intentos excedidos. Se ha bloqueado el usuario." });
+                        }
+                        else
+                        {
+                            return RedirectToAction("Login", "Home", new { mensaje = "Contraseña incorrecta, "+ (3-usuario.intentosFallidos) +" intentos restantes." });
+                        }
+                }
+                usuario.intentosFallidos = 0;
+                _context.Update(usuario);
+                _context.SaveChanges();
                 HttpContext.Session.SetInt32("IdUsuario",usuario.id);
                 HttpContext.Session.SetInt32("IsAdmin", usuario.isAdmin ? 1 : 0);
                 return RedirectToAction("Pagar", "PlazosFijos");
@@ -77,6 +101,13 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         {
             HttpContext.Session.Clear();
             return RedirectToAction("Index", "Home"); //Usuario logueado
+        }
+
+        [HttpGet]
+        public IActionResult Registrarse(string mensaje = "")
+        {
+            ViewData["mensaje"] = mensaje;
+            return View();
         }
 
     }
