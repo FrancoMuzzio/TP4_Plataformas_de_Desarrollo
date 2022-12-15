@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -39,17 +40,17 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         // GET: Usuarios
         public async Task<IActionResult> Index()
         {
-            if (usuarioLogueado == null)
+            if (usuarioLogueado == null || !usuarioLogueado.isAdmin)
             {
                 return RedirectToAction("Index", "Home");
             }
-            return View(await _context.usuarios.ToListAsync());
+            return View(await _context.usuarios.OrderBy(u=>u.nombre).ToListAsync());
         }
 
         // GET: Usuarios/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (usuarioLogueado == null)
+            if (usuarioLogueado == null || !usuarioLogueado.isAdmin)
             {
                 return RedirectToAction("Index", "Home");
             }
@@ -71,7 +72,7 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         // GET: Usuarios/Create
         public IActionResult Create()
         {
-            if (usuarioLogueado == null)
+            if (usuarioLogueado == null || !usuarioLogueado.isAdmin)
             {
                 return RedirectToAction("Index", "Home");
             }
@@ -83,15 +84,19 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(int dni, string nombre, string apellido, string email, string password, string password2)
+        public async Task<IActionResult> Create(int dni, string nombre, string apellido, string mail, string password, string password2 = null)
         {
+            if(usuarioLogueado != null && usuarioLogueado.isAdmin)
+            {
+                password2 = password;
+            }
             try
             {
                 if(_context.usuarios.Where(u => u.dni == dni).FirstOrDefault()!=null)
                 {
                     return (usuarioLogueado != null && usuarioLogueado.isAdmin) ? RedirectToAction(nameof(Index), new { mensaje = "Ya existe un usuario con ese DNI." }) : RedirectToAction("Registrarse", "Home", new { mensaje = "Ya existe un usuario con ese DNI." });
                 }
-                if(_context.usuarios.Where(u => u.mail == email).FirstOrDefault()!=null)
+                if(_context.usuarios.Where(u => u.mail == mail).FirstOrDefault()!=null)
                 {
                     return (usuarioLogueado != null && usuarioLogueado.isAdmin) ? RedirectToAction(nameof(Index), new { mensaje = "Ya existe un usuario con ese email." }) : RedirectToAction("Registrarse", "Home", new { mensaje = "Ya existe un usuario con ese email." });
                 }
@@ -99,7 +104,7 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
                 {
                     return (usuarioLogueado != null && usuarioLogueado.isAdmin) ? RedirectToAction(nameof(Index), new { mensaje = "Las contraseñas no coinciden." }) : RedirectToAction("Registrarse", "Home", new { mensaje = "Las contraseñas no coinciden." });
                 }
-                Usuario nuevo = new Usuario(dni, nombre, apellido, email, password, 0, false, false);
+                Usuario nuevo = new Usuario(dni, nombre, apellido, mail, password, 0, false, false);
                 _context.usuarios.Add(nuevo);
                 await _context.SaveChangesAsync();
                 return (usuarioLogueado != null && usuarioLogueado.isAdmin) ? RedirectToAction(nameof(Index)) : RedirectToAction("Index", "Home");
@@ -113,7 +118,7 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         // GET: Usuarios/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (usuarioLogueado == null)
+            if (usuarioLogueado == null || !usuarioLogueado.isAdmin)
             {
                 return RedirectToAction("Index", "Home");
             }
@@ -135,44 +140,44 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("id,dni,nombre,apellido,mail,intentosFallidos,bloqueado,password,isAdmin")] Usuario usuario)
+        public async Task<IActionResult> Edit(int id,int dni, string nombre, string apellido, string mail, int intentosFallidos, bool isAdmin)
         {
-            if (usuarioLogueado == null)
+            if (usuarioLogueado == null || !usuarioLogueado.isAdmin)
             {
                 return RedirectToAction("Index", "Home");
             }
-            if (id != usuario.id)
+            Usuario? usuario = await _context.usuarios.FindAsync(id);
+            if (usuario.id == null)
             {
-                return NotFound();
+                return RedirectToAction("Edit", "Usuarios", new { mensaje = "Usuario no encontrado." });
             }
+            usuario.dni = dni;
+            usuario.nombre = nombre;
+            usuario.apellido = apellido;
+            usuario.mail = mail;
+            usuario.intentosFallidos = intentosFallidos;
+            usuario.isAdmin = isAdmin;
+            if(intentosFallidos == 3)
+            {
+                usuario.bloqueado = true;
+            }
+            try
+            {
+                _context.Update(usuario);
+                await _context.SaveChangesAsync();
+            }
+            catch
+            {
+                return RedirectToAction("Edit", "Usuarios", new { mensaje = "Error al editar el usuario." });
+            }
+            return RedirectToAction(nameof(Index));
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(usuario);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!UsuarioExists(usuario.id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(usuario);
         }
 
         // GET: Usuarios/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (usuarioLogueado == null)
+            if (usuarioLogueado == null || !usuarioLogueado.isAdmin)
             {
                 return RedirectToAction("Index", "Home");
             }
@@ -196,7 +201,7 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (usuarioLogueado == null)
+            if (usuarioLogueado == null || !usuarioLogueado.isAdmin)
             {
                 return RedirectToAction("Index", "Home");
             }

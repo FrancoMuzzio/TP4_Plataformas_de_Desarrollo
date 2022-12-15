@@ -1,10 +1,10 @@
 ﻿@model WebApplication_plataformas_de_desarrollo.Models.Usuario
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Editar";
 }
 
-<h1>Edit</h1>
+<h1>Editar</h1>
 
 <h4>Usuario</h4>
 <hr />
@@ -14,8 +14,8 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="id" />
             <div class="form-group">
-                <label asp-for="dni" class="control-label"></label>
-                <input asp-for="dni" class="form-control" />
+                <label asp-for="dni" class="control-label">DNI</label>
+                <input asp-for="dni" type="number" class="form-control" />
                 <span asp-validation-for="dni" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -30,38 +30,25 @@
             </div>
             <div class="form-group">
                 <label asp-for="mail" class="control-label"></label>
-                <input asp-for="mail" class="form-control" />
+                <input asp-for="mail" type="email" class="form-control" />
                 <span asp-validation-for="mail" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="intentosFallidos" class="control-label"></label>
-                <input asp-for="intentosFallidos" class="form-control" />
+                <label asp-for="intentosFallidos" class="control-label">intentos fallidos</label>
+                <input asp-for="intentosFallidos" min="0" max="3" type="number" class="form-control" />
                 <span asp-validation-for="intentosFallidos" class="text-danger"></span>
             </div>
             <div class="form-group form-check">
                 <label class="form-check-label">
-                    <input class="form-check-input" asp-for="bloqueado" /> @Html.DisplayNameFor(model => model.bloqueado)
+                    <input class="form-check-input" asp-for="isAdmin" /> admin
                 </label>
             </div>
             <div class="form-group">
-                <label asp-for="password" class="control-label"></label>
-                <input asp-for="password" class="form-control" />
-                <span asp-validation-for="password" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="isAdmin" /> @Html.DisplayNameFor(model => model.isAdmin)
-                </label>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <input type="submit" value="Editar" class="btn btn-dark" /> |
+                <a asp-action="Index">Volver</a>
             </div>
         </form>
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>
 
 @section Scripts {
