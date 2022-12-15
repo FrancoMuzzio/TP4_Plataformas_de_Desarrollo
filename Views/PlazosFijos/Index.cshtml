@@ -16,7 +16,7 @@
                 @Html.DisplayNameFor(model => model.monto)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.fechaFin)
+                fecha finalizacion
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.cbu)
@@ -39,7 +39,7 @@
             <td>
                 @if (item.pagado)
                 {
-                    <a type="button" class="btn btn-dark  btn-sm" asp-action="Delete" asp-route-id="@item.id">Eliminar</a>
+                    <a type="button" class="btn btn-dark btn-sm" asp-action="Delete" asp-route-id="@item.id">Eliminar</a>
                 }
             </td>
         </tr>

@@ -118,6 +118,7 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         }
 
         // GET: PlazosFijos/Delete/5
+        [HttpGet]
         public async Task<IActionResult> Delete(int? id, string mensaje = "")
         {
             ViewData["mensaje"] = mensaje;
@@ -125,43 +126,14 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
             {
                 return RedirectToAction("Index", "Home");
             }
-            if (id == null || _context.plazosFijos == null)
+            PlazoFijo? pf = await _context.plazosFijos.FindAsync(id);
+            if (pf == null)
             {
-                return NotFound();
+                return RedirectToAction("Index", "PlazosFijos", new { mensaje = "Plazo fijo no encontrado." });
             }
-
-            var plazoFijo = await _context.plazosFijos
-                .Include(p => p.titular)
-                .FirstOrDefaultAsync(m => m.id == id);
-            if (plazoFijo == null)
-            {
-                return NotFound();
-            }
-
-            return View(plazoFijo);
-        }
-
-        // POST: PlazosFijos/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            if (usuarioLogueado == null)
-            {
-                return RedirectToAction("Index", "Home");
-            }
-            if (_context.plazosFijos == null)
-            {
-                return RedirectToAction("Delete", "PlazosFijos", new { mensaje = "Entity set 'MiContexto.plazosFijos'  is null.." });
-            }
-            var plazoFijo = await _context.plazosFijos.FindAsync(id);
-            if (plazoFijo != null)
-            {
-                _context.plazosFijos.Remove(plazoFijo);
-            }
-            
+            _context.plazosFijos.Remove(pf);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index", "PlazosFijos");
         }
 
         public async Task<IActionResult> Pagar()

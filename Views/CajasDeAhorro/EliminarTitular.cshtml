@@ -29,7 +29,7 @@
         <dd class="col-sm-10">
             @foreach (var titular in Model.titulares)
             {
-                var nombreTitular = titular.nombre.ToString() + " " + titular.apellido.ToString();
+                var nombreTitular = titular.nombre.ToString() + " " + titular.apellido.ToString() + " (" + titular.dni.ToString() + ")";
                 <li>@nombreTitular</li>
             }
         </dd>
@@ -41,7 +41,7 @@
             <label for="dni">DNI:</label>
             <input type="number" class="form-control" name="dni" id="dni" placeholder="Dni del titular a eliminar.">
             <p class="text-danger">@ViewData["mensaje"]</p>
-            <input type="submit" value="Eliminar" class="btn btn-success" /> |
+            <input type="submit" value="Eliminar" class="btn btn-dark" /> |
             <a asp-action="Index">Volver</a>
         </div>
     </form>

@@ -1,10 +1,10 @@
 ﻿@model WebApplication_plataformas_de_desarrollo.Models.Tarjeta
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Eliminar";
 }
 
-<h1>Delete</h1>
+<h1>Eliminar</h1>
 
 <h3>Estas seguro que queres eliminar la Tarjeta?</h3>
 <div>
@@ -34,14 +34,17 @@
             @Html.DisplayNameFor(model => model.titular)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.titular.apellido)
+            @{
+                var nombreTitular = Model.titular.nombre.ToString() + " " + Model.titular.apellido.ToString();
+            }
+            @nombreTitular
         </dd>
     </dl>
     
     <form asp-action="Delete">
         <input type="hidden" asp-for="id" />
         <p class="text-danger">@ViewData["mensaje"]</p>
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Volve al Index</a>
+        <input type="submit" value="Delete" class="btn btn-dark" /> |
+        <a asp-action="Index">Volver</a>
     </form>
 </div>

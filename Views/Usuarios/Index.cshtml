@@ -45,6 +45,12 @@
             <td>
                 <a type="button" class="btn btn-dark" asp-action="Edit" asp-route-id="@item.id">Editar</a>
                 <a type="button" class="btn btn-dark" asp-action="Details" asp-route-id="@item.id">Detalles</a>
+                    @if (item.bloqueado)
+                    {
+                        <a type="button" class="btn btn-dark" asp-action="Desbloquear" asp-route-id="@item.id">Desbloquear</a>
+                    }else{
+                        <a type="button" class="btn btn-dark" asp-action="Bloquear" asp-route-id="@item.id">Bloquear</a>
+                    }
                 <a type="button" class="btn btn-dark" asp-action="Delete" asp-route-id="@item.id">Eliminar</a>
             </td>
         </tr>

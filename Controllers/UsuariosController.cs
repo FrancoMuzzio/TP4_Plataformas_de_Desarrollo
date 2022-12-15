@@ -84,9 +84,10 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(int dni, string nombre, string apellido, string mail, string password, string password2 = null)
+        public async Task<IActionResult> Create(int dni, string nombre, string apellido, string mail, string password, string password2 = "", string mensaje = "")
         {
-            if(usuarioLogueado != null && usuarioLogueado.isAdmin)
+            ViewData["mensaje"] = mensaje;
+            if (usuarioLogueado != null && usuarioLogueado.isAdmin)
             {
                 password2 = password;
             }
@@ -94,15 +95,15 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
             {
                 if(_context.usuarios.Where(u => u.dni == dni).FirstOrDefault()!=null)
                 {
-                    return (usuarioLogueado != null && usuarioLogueado.isAdmin) ? RedirectToAction(nameof(Index), new { mensaje = "Ya existe un usuario con ese DNI." }) : RedirectToAction("Registrarse", "Home", new { mensaje = "Ya existe un usuario con ese DNI." });
+                    return (usuarioLogueado != null && usuarioLogueado.isAdmin) ? RedirectToAction("Create", "Usuarios", new { mensaje = "Ya existe un usuario con ese DNI." }) : RedirectToAction("Registrarse", "Home", new { mensaje = "Ya existe un usuario con ese DNI." });
                 }
                 if(_context.usuarios.Where(u => u.mail == mail).FirstOrDefault()!=null)
                 {
-                    return (usuarioLogueado != null && usuarioLogueado.isAdmin) ? RedirectToAction(nameof(Index), new { mensaje = "Ya existe un usuario con ese email." }) : RedirectToAction("Registrarse", "Home", new { mensaje = "Ya existe un usuario con ese email." });
+                    return (usuarioLogueado != null && usuarioLogueado.isAdmin) ? RedirectToAction("Create", "Usuarios", new { mensaje = "Ya existe un usuario con ese email." }) : RedirectToAction("Registrarse", "Home", new { mensaje = "Ya existe un usuario con ese email." });
                 }
                 if(password!=password2)
                 {
-                    return (usuarioLogueado != null && usuarioLogueado.isAdmin) ? RedirectToAction(nameof(Index), new { mensaje = "Las contraseñas no coinciden." }) : RedirectToAction("Registrarse", "Home", new { mensaje = "Las contraseñas no coinciden." });
+                    return (usuarioLogueado != null && usuarioLogueado.isAdmin) ? RedirectToAction("Create", "Usuarios", new { mensaje = "Las contraseñas no coinciden." }) : RedirectToAction("Registrarse", "Home", new { mensaje = "Las contraseñas no coinciden." });
                 }
                 Usuario nuevo = new Usuario(dni, nombre, apellido, mail, password, 0, false, false);
                 _context.usuarios.Add(nuevo);
@@ -116,8 +117,9 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         }
 
         // GET: Usuarios/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int? id, string mensaje = "")
         {
+            ViewData["mensaje"] = mensaje;
             if (usuarioLogueado == null || !usuarioLogueado.isAdmin)
             {
                 return RedirectToAction("Index", "Home");
@@ -147,7 +149,7 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
                 return RedirectToAction("Index", "Home");
             }
             Usuario? usuario = await _context.usuarios.FindAsync(id);
-            if (usuario.id == null)
+            if (usuario == null)
             {
                 return RedirectToAction("Edit", "Usuarios", new { mensaje = "Usuario no encontrado." });
             }
@@ -219,9 +221,49 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool UsuarioExists(int id)
+        // GET: Usuarios/Desbloquear/5
+        public async Task<IActionResult> Desbloquear(int id)
         {
-            return _context.usuarios.Any(e => e.id == id);
+            if (usuarioLogueado == null || !usuarioLogueado.isAdmin)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            var usuario = await _context.usuarios.FindAsync(id);
+            if (usuario != null)
+            {
+                usuario.intentosFallidos = 0;
+                usuario.bloqueado = false;
+                _context.Update(usuario);
+            }
+            else
+            {
+                return Problem("Error al buscar usuario con id: "+id+" en la base de datos.");
+            }
+            
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+    
+        // GET: Usuarios/Bloquear/5
+        public async Task<IActionResult> Bloquear(int id)
+        {
+            if (usuarioLogueado == null || !usuarioLogueado.isAdmin)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            var usuario = await _context.usuarios.FindAsync(id);
+            if (usuario != null)
+            {
+                usuario.bloqueado = true;
+                _context.Update(usuario);
+            }
+            else
+            {
+                return Problem("Error al buscar usuario con id: "+id+" en la base de datos.");
+            }
+            
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
     }

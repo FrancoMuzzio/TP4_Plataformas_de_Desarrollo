@@ -13,7 +13,7 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.cbu)
+                CBU
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.saldo)
@@ -31,7 +31,7 @@
                 @Html.DisplayFor(modelItem => item.cbu)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.saldo)
+                $ @(item.saldo>0?@item.saldo.ToString("#.##"):0)
             </td>
             <td>
                 <ul>
@@ -49,11 +49,11 @@
                 <a type="button" class="btn btn-dark" asp-action="Depositar" asp-route-id="@item.id">Depositar</a>
                 <a type="button" class="btn btn-dark" asp-action="Retirar" asp-route-id="@item.id">Retirar</a>
                 <a type="button" class="btn btn-dark" asp-action="Transferir" asp-route-id="@item.id">Transferir</a>
-                <a type="button" class="btn btn-dark" asp-action="Delete" asp-route-id="@item.id">Delete</a>
+                <a type="button" class="btn btn-dark" asp-action="Delete" asp-route-id="@item.id">Eliminar</a>
             </td>
         </tr>
 }
-     <p class="text-danger">@ViewData["mensaje"]</p>
 
     </tbody>
 </table>
+<p class="text-danger">@ViewData["mensaje"]</p>

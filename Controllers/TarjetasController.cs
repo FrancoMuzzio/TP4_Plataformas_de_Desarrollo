@@ -153,7 +153,7 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
 
         }
         // GET: Tarjetas/Pagar/5
-        public async Task<IActionResult> Pagar(int? id, string mensaje = "")
+        public IActionResult Pagar(int? id, string mensaje = "")
         {
             ViewData["mensaje"] = mensaje;
             if (usuarioLogueado == null)

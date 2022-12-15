@@ -82,16 +82,17 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
             {
                 Pago nuevoPago = new Pago(usuarioLogueado, nombre, monto);
                 _context.pagos.Add(nuevoPago);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            catch (Exception ex)
+            catch
             {
                 return Problem("Error.");
             }
         }
 
         // GET: Pagos/Delete/5
+        [HttpGet]
         public async Task<IActionResult> Delete(int? id, string mensaje = "")
         {
             ViewData["mensaje"] = mensaje;
@@ -99,43 +100,14 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
             {
                 return RedirectToAction("Index", "Home");
             }
-            if (id == null || _context.pagos == null)
+            Pago? pago = await _context.pagos.FindAsync(id);
+            if(pago == null)
             {
-                return NotFound();
+                return RedirectToAction("Index", "Pagos", new { mensaje = "Pago no encontrado." });
             }
-
-            var pago = await _context.pagos
-                .Include(p => p.usuario)
-                .FirstOrDefaultAsync(m => m.id == id);
-            if (pago == null)
-            {
-                return NotFound();
-            }
-
-            return View(pago);
-        }
-
-        // POST: Pagos/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            if (usuarioLogueado == null)
-            {
-                return RedirectToAction("Index", "Home");
-            }
-            if (_context.pagos == null)
-            {
-                return Problem("Entity set 'MiContexto.pagos'  is null.");
-            }
-            var pago = await _context.pagos.FindAsync(id);
-            if (pago != null)
-            {
-                _context.pagos.Remove(pago);
-            }
-            
+            _context.pagos.Remove(pago);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index", "Pagos");
         }
 
         // GET: Pagos/PagarConTarjeta/5
@@ -198,14 +170,16 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Pagar(int id, int numero, string from)
         {
-            Debug.WriteLine("-----------------------------NUMERO: " + numero);
-            Pago pago = await _context.pagos.FindAsync(id);
-            if(from == "PagarConCaja") { 
-                CajaDeAhorro caja = await _context.cajas.Where(c=>c.cbu == numero).FirstOrDefaultAsync();
-                if (pago == null)
-                {
-                    return RedirectToAction("PagarConCaja", "Pagos", new { id = id, mensaje = "No se encuentra el pago." });
+            Pago? pago = await _context.pagos.FindAsync(id);
+            if (pago == null)
+            {
+                return RedirectToAction("PagarConCaja", "Pagos", new { id = id, mensaje = "No se encuentra el pago." });
+            }
+            if (from == "PagarConCaja") { 
+                if(numero == 0) {
+                    return RedirectToAction("PagarConCaja", "Pagos", new { id = id, mensaje = "Seleccione una caja de ahorros." });
                 }
+                CajaDeAhorro? caja = await _context.cajas.Where(c=>c.cbu == numero).FirstOrDefaultAsync();
                 if (pago.pagado)
                 {
                     return RedirectToAction("PagarConCaja", "Pagos", new { id = id, mensaje = "El pago ya fue pagado anteriormente." });
@@ -230,6 +204,10 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
             }
             else
             {
+                if (numero == 0)
+                {
+                    return RedirectToAction("PagarConTarjeta", "Pagos", new { id = id, mensaje = "Seleccione una tarjeta." });
+                }
                 Tarjeta? tarjeta = await _context.tarjetas.Where(t => t.numero == numero).FirstOrDefaultAsync();
                 if (tarjeta == null)
                 {
@@ -248,6 +226,7 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
                 return RedirectToAction(nameof(Index));
             }
             return Problem();
+            
         }
 
     }
