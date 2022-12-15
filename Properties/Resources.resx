@@ -118,6 +118,6 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ConnectionStr" xml:space="preserve">
-    <value>Data Source=DESKTOP-ER7RIC5\SQLEXPRESS;Initial Catalog=bancoTP4;Integrated Security=True;Encrypt=False</value>
+    <value>Data Source=DESKTOP-9NOV8UV;Initial Catalog=nuevamaga;Integrated Security=True;Encrypt=False</value>
   </data>
 </root>

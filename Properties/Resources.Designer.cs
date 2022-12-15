@@ -61,7 +61,7 @@ namespace WebApplication_plataformas_de_desarrollo.Properties {
         }
         
         /// <summary>
-        ///   Busca una cadena traducida similar a Data Source=DESKTOP-ER7RIC5\SQLEXPRESS;Initial Catalog=bancoTP4;Integrated Security=True;Encrypt=False.
+        ///   Busca una cadena traducida similar a Data Source=DESKTOP-9NOV8UV;Initial Catalog=nuevamaga;Integrated Security=True;Encrypt=False.
         /// </summary>
         internal static string ConnectionStr {
             get {
