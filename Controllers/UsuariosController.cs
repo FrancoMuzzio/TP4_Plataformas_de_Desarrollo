@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -33,8 +34,8 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
             _context.movimientos.Load();
             _context.plazosFijos.Load();
             usuarioLogueado = _context.usuarios.Where(u => u.id == httpContextAccessor.HttpContext.Session.GetInt32("IdUsuario")).FirstOrDefault();
-        
-    }
+
+        }
 
         // GET: Usuarios
         public async Task<IActionResult> Index()
@@ -51,7 +52,7 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
             {
                 return View(await _context.pagos.Where(p => p.usuario == usuarioLogueado).OrderByDescending(u => u.id).ToListAsync());
             }
-           }
+        }
 
 
         // GET: Usuarios/Create
@@ -63,39 +64,46 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         // POST: Usuarios/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
+        [HttpPost, ActionName("Create")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(string Nombre, string Apellido, int Dni, string Mail, string Password)
         {
-            bool esValido = false;
+
             Usuario us = _context.usuarios.Where(u => u.dni == Dni || u.mail == Mail).FirstOrDefault();
-            if (us.isAdmin == true)
+            if (us == null)
             {
+
                 try
                 {
                     Usuario nuevo = new Usuario(Dni, Nombre, Apellido, Mail, Password, 0, false, false);
-                    esValido = true;
                     _context.usuarios.Add(nuevo);
-                    _context.SaveChangesAsync();
+                    await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
+
+
                 }
                 catch
                 {
                     return RedirectToAction("Create", "Usuarios", new { mensaje = "El usuario no ha podido crearse" });
-                    
+
                 }
             }
+
             else
             {
-                return Problem();
+                return RedirectToAction("Create", "Usuarios", new { mensaje = "El usuario ya esta creado" });
+
+
             }
         }
 
 
 
 
-            // GET: Usuarios/Edit/5
-            public async Task<IActionResult> Edit(int? id)
+
+
+        // GET: Usuarios/Edit/5
+        public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.usuarios == null)
             {
@@ -113,9 +121,9 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         // POST: Usuarios/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
+        [HttpPost, ActionName("Edit")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int Id, int dni, string mail, string pass)
+        public async Task<IActionResult> Edit(int Id, string mail, string password)
         {
             try
             {
@@ -123,9 +131,9 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
                 if (usuarioAModificar != null)
                 {
                     usuarioAModificar.mail = mail;
-                    usuarioAModificar.password = pass;
+                    usuarioAModificar.password = password;
                     _context.Update(usuarioAModificar);
-                    _context.SaveChangesAsync();
+                    await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
                 }
                 return RedirectToAction("Edit", "Usuarios", new { mensaje = "No se encontró a este usuario." });
@@ -136,10 +144,10 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
                 return Problem("Error.");
             }
         }
-       
+
 
         // GET: Usuarios/Delete/5
-        public async Task<IActionResult> Delete(int? id, string mensaje="")
+        public async Task<IActionResult> Delete(int? id, string mensaje = "")
         {
             ViewData["mensaje"] = mensaje;
             if (usuarioLogueado == null)
@@ -187,6 +195,6 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
             }
         }
 
-       
+
     }
 }

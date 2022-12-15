@@ -32,28 +32,17 @@
                 <input asp-for="mail" class="form-control" />
                 <span asp-validation-for="mail" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="intentosFallidos" class="control-label"></label>
-                <input asp-for="intentosFallidos" class="form-control" />
-                <span asp-validation-for="intentosFallidos" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="bloqueado" /> @Html.DisplayNameFor(model => model.bloqueado)
-                </label>
-            </div>
+           
+         
             <div class="form-group">
                 <label asp-for="password" class="control-label"></label>
                 <input asp-for="password" class="form-control" />
                 <span asp-validation-for="password" class="text-danger"></span>
             </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="isAdmin" /> @Html.DisplayNameFor(model => model.isAdmin)
-                </label>
-            </div>
+          
+            <p class="text-danger">@ViewData["mensaje"]</p>
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Crear" class="btn btn-primary" />
             </div>
         </form>
     </div>
