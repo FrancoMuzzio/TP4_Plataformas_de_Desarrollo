@@ -7,16 +7,13 @@
 <h1>Index</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a type="button" class="btn btn-dark" asp-action="Create">Crear nuevo pago</a>
 </p>
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.usuario)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.nombre)
+                pago
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.monto)
@@ -32,10 +29,7 @@
     </thead>
     <tbody>
 @foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.usuario.apellido)
-            </td>
+        <tr class="text-@(item.pagado?"muted":"dark")">
             <td>
                 @Html.DisplayFor(modelItem => item.nombre)
             </td>
@@ -49,9 +43,12 @@
                 @Html.DisplayFor(modelItem => item.metodo)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.id">Delete</a>
+                @if(item.pagado){
+                    <a type="button" class="btn btn-dark" asp-action="Delete" asp-route-id="@item.id">Eliminar</a>
+                }else{
+                    <a type="button" class="btn btn-dark" asp-action="PagarConCaja" asp-route-id="@item.id">Pagar con caja de ahorro</a>
+                    <a type="button" class="btn btn-dark" asp-action="PagarConTarjeta" asp-route-id="@item.id">Pagar con tarjeta</a>
+                }
             </td>
         </tr>
 }

@@ -1,0 +1,39 @@
+﻿@model WebApplication_plataformas_de_desarrollo.Models.Tarjeta
+
+@{
+    ViewData["Title"] = "Pagar";
+}
+
+<h1>Pagar</h1>
+
+<h4>Tarjeta</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Pagar">
+            <input type="hidden" asp-for="id" />
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label class="control-label">Caja de ahorro</label>
+                <select class="form-select" name="cbu"
+                        asp-items="ViewBag.Cajas">
+                    <option>Seleccionar una caja de ahorro</option>
+                </select>
+            </div>
+            <p class="text-danger">@ViewData["mensaje"]</p>
+            <div class="form-group">
+                <input type="submit" value="Pagar" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Volver</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    }

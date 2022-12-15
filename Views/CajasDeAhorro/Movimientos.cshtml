@@ -34,7 +34,7 @@
             @Html.DisplayNameFor(model => model.movimientos)
         </dt>
         <dd class="col-sm-10">
-            @foreach (var movimiento in Model.movimientos)
+            @foreach (var movimiento in Model.movimientos.OrderByDescending(m => m.fecha))
             {
                 <li>@movimiento</li>
             }

@@ -152,6 +152,52 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
 
 
         }
+        // GET: Tarjetas/Pagar/5
+        public async Task<IActionResult> Pagar(int? id, string mensaje = "")
+        {
+            ViewData["mensaje"] = mensaje;
+            if (usuarioLogueado == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            ViewBag.Cajas = new SelectList(usuarioLogueado.cajas.Select(c => new
+            {
+                cbu = c.cbu,
+                text_to_show = "CBU: " + c.cbu + " - Saldo: " + c.saldo
+            }), "cbu", "text_to_show");
+            return View();
+        }
+
+        // POST: Tarjetas/Pagar/5
+        [HttpPost, ActionName("Pagar")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Pagar(int id, int cbu)
+        {
+            CajaDeAhorro? caja = _context.cajas.Where(caja => caja.cbu == cbu).FirstOrDefault();
+            Tarjeta? tarjeta = _context.tarjetas.Where(tarjeta => tarjeta.id == id).FirstOrDefault(); ;
+
+            if (tarjeta == null)
+            {
+                return RedirectToAction("Pagar", "Tarjetas", new { mensaje = "No se ecnontro tarjeta." });
+            }
+            if (caja == null)
+            {
+                return RedirectToAction("Pagar", "Tarjetas", new { mensaje = "No se encontro caja." });
+            }
+            if (caja.saldo < tarjeta.consumo)
+            {
+                return RedirectToAction("Pagar", "Tarjetas", new { mensaje = "Esa caja de ahorro no tiene saldo suficiente." });
+            }
+            caja.saldo -= tarjeta.consumo;
+            Movimiento movimientoNuevo = new Movimiento(caja, "Pago de Tarjeta " + tarjeta.numero, tarjeta.consumo);
+            _context.movimientos.Add(movimientoNuevo);
+            caja.movimientos.Add(movimientoNuevo);
+            tarjeta.consumo = 0;
+            _context.Update(tarjeta);
+            _context.Update(caja);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
 
       
     }

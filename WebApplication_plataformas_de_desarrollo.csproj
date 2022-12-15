@@ -7,6 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Views\Movimientos\**" />
+    <Content Remove="Views\Movimientos\**" />
+    <EmbeddedResource Remove="Views\Movimientos\**" />
+    <None Remove="Views\Movimientos\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Controllers\MovimientosController.cs" />
     <Compile Remove="Migrations\20221127212017_inicial.cs" />
     <Compile Remove="Migrations\20221127212017_inicial.Designer.cs" />
     <Compile Remove="Migrations\20221213153040_DeleteCascade.cs" />
@@ -31,6 +39,7 @@
     <Content Remove="Views\Home\Index - Copia.cshtml" />
     <Content Remove="Views\Home\Index1.cshtml" />
     <Content Remove="Views\Home\Privacy.cshtml" />
+    <Content Remove="Views\Pagos\Index1.cshtml" />
     <Content Remove="Views\Tarjetas\Create.cshtml" />
     <Content Remove="Views\Tarjetas\Details.cshtml" />
     <Content Remove="Views\Tarjetas\Edit.cshtml" />

@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<WebApplication_plataformas_de_desarrollo.Models.Tarjeta>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Pagos";
 }
 
 <h1>Index</h1>
@@ -15,7 +15,6 @@
             <th>
                 @Html.DisplayNameFor(model => model.numero)
             </th>
-          
             <th>
                 @Html.DisplayNameFor(model => model.limite)
             </th>
@@ -40,10 +39,12 @@
                 @Html.DisplayFor(modelItem => item.consumo)
             </td>
           
-            <td>
-                    
-              
-              <a type="button" class="btn btn-dark" asp-action="Delete" asp-route-id="@item.id">Delete</a>
+            <td> 
+                    @if (item.consumo > 0)
+                    {
+                        <a type="button" class="btn btn-dark" asp-action="Pagar" asp-route-id="@item.id">Pagar</a>
+                    }
+              <a type="button" class="btn btn-dark" asp-action="Delete" asp-route-id="@item.id">Eliminar</a>
             </td>
         </tr>
 }

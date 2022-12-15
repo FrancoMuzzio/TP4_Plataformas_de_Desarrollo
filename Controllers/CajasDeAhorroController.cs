@@ -112,8 +112,6 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
             {
                 Usuario? titular = _context.usuarios.Where(usuario => usuario.dni == dni).FirstOrDefault();
                 CajaDeAhorro? caja = await _context.cajas.FindAsync(id);
-                Debug.WriteLine("TITULAR: "+titular);
-                Debug.WriteLine("CAJA: "+caja);
                 if (titular == null)
                 {
                     return RedirectToAction("EliminarTitular", "CajasDeAhorro", new { mensaje = "No se encontró usuario con este DNI en la lista de Usuarios del Banco." });
@@ -381,7 +379,7 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
             }
             catch (Exception ex)
             {
-                return Problem("Error");
+                return Problem("Error: "+ex.ToString());
             }
         }
 
