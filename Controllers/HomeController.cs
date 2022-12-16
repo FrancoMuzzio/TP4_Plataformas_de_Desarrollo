@@ -81,7 +81,7 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
                 _context.SaveChanges();
                 HttpContext.Session.SetInt32("IdUsuario",usuario.id);
                 HttpContext.Session.SetInt32("IsAdmin", usuario.isAdmin ? 1 : 0);
-                return RedirectToAction("Pagar", "PlazosFijos");
+                return RedirectToAction("Index", "Home");
             }
             catch
             {
