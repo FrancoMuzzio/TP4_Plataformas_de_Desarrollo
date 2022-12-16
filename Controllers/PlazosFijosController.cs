@@ -84,8 +84,6 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
             }
             try
             {
-                Debug.WriteLine("MONTO: " + monto);
-                Debug.WriteLine("CBU: "+ cbu);
                 if (monto < 1000)
                 {
                     return RedirectToAction("Create", "PlazosFijos", new { mensaje = "Monto insuficiente para crear el plazo fijo." });
