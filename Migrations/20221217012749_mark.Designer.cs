@@ -12,8 +12,8 @@ using WebApplication_plataformas_de_desarrollo.Data;
 namespace WebApplicationplataformasdedesarrollo.Migrations
 {
     [DbContext(typeof(MiContexto))]
-    [Migration("20221214113342_otroRepo")]
-    partial class otroRepo
+    [Migration("20221217012749_mark")]
+    partial class mark
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace WebApplicationplataformasdedesarrollo.Migrations
 {
     /// <inheritdoc />
-    public partial class a : Migration
+    public partial class mark : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
