@@ -12,8 +12,8 @@ using WebApplication_plataformas_de_desarrollo.Data;
 namespace WebApplicationplataformasdedesarrollo.Migrations
 {
     [DbContext(typeof(MiContexto))]
-    [Migration("20221217012749_mark")]
-    partial class mark
+    [Migration("20221219135039_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -193,6 +193,9 @@ namespace WebApplicationplataformasdedesarrollo.Migrations
                     b.Property<bool>("isAdmin")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("isVip")
+                        .HasColumnType("bit");
+
                     b.Property<string>("mail")
                         .IsRequired()
                         .HasColumnType("varchar(50)");
@@ -218,6 +221,7 @@ namespace WebApplicationplataformasdedesarrollo.Migrations
                             dni = 40009479,
                             intentosFallidos = 0,
                             isAdmin = true,
+                            isVip = true,
                             mail = "franco.muzzio@davinci.edu.ar",
                             nombre = "Franco",
                             password = "1234"
@@ -230,6 +234,7 @@ namespace WebApplicationplataformasdedesarrollo.Migrations
                             dni = 63309307,
                             intentosFallidos = 0,
                             isAdmin = true,
+                            isVip = false,
                             mail = "fiorella.piñeiro@davinci.edu.ar",
                             nombre = "Fiorella",
                             password = "1234"
@@ -242,6 +247,7 @@ namespace WebApplicationplataformasdedesarrollo.Migrations
                             dni = 32677773,
                             intentosFallidos = 0,
                             isAdmin = true,
+                            isVip = false,
                             mail = "magalí.markauskas@davinci.edu.ar",
                             nombre = "Magalí",
                             password = "1234"
@@ -254,6 +260,7 @@ namespace WebApplicationplataformasdedesarrollo.Migrations
                             dni = 21035623,
                             intentosFallidos = 0,
                             isAdmin = true,
+                            isVip = false,
                             mail = "martín.sassano@davinci.edu.ar",
                             nombre = "Martín",
                             password = "1234"
@@ -266,6 +273,7 @@ namespace WebApplicationplataformasdedesarrollo.Migrations
                             dni = 23391008,
                             intentosFallidos = 0,
                             isAdmin = true,
+                            isVip = false,
                             mail = "agustín.giudice@davinci.edu.ar",
                             nombre = "Agustín",
                             password = "1234"
@@ -278,6 +286,7 @@ namespace WebApplicationplataformasdedesarrollo.Migrations
                             dni = 45686773,
                             intentosFallidos = 0,
                             isAdmin = true,
+                            isVip = false,
                             mail = "alexis.maubert@davinci.edu.ar",
                             nombre = "Alexis",
                             password = "1234"
@@ -290,6 +299,7 @@ namespace WebApplicationplataformasdedesarrollo.Migrations
                             dni = 84355987,
                             intentosFallidos = 0,
                             isAdmin = false,
+                            isVip = false,
                             mail = "marcos.dimarco@davinci.edu.ar",
                             nombre = "Marcos",
                             password = "1234"
@@ -302,6 +312,7 @@ namespace WebApplicationplataformasdedesarrollo.Migrations
                             dni = 40563444,
                             intentosFallidos = 2,
                             isAdmin = false,
+                            isVip = false,
                             mail = "juliana.gutierrez@davinci.edu.ar",
                             nombre = "Juliana",
                             password = "1234"
@@ -314,6 +325,7 @@ namespace WebApplicationplataformasdedesarrollo.Migrations
                             dni = 30447163,
                             intentosFallidos = 0,
                             isAdmin = false,
+                            isVip = false,
                             mail = "ariana.houseman@davinci.edu.ar",
                             nombre = "Ariana",
                             password = "1234"
@@ -326,6 +338,7 @@ namespace WebApplicationplataformasdedesarrollo.Migrations
                             dni = 73026363,
                             intentosFallidos = 1,
                             isAdmin = false,
+                            isVip = false,
                             mail = "pedro.poggi@davinci.edu.ar",
                             nombre = "Pedro",
                             password = "1234"
@@ -338,6 +351,7 @@ namespace WebApplicationplataformasdedesarrollo.Migrations
                             dni = 39440793,
                             intentosFallidos = 0,
                             isAdmin = false,
+                            isVip = false,
                             mail = "lazaro.ramirez@davinci.edu.ar",
                             nombre = "Lazaro",
                             password = "1234"

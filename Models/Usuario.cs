@@ -17,6 +17,7 @@ namespace WebApplication_plataformas_de_desarrollo.Models
         public string mail { get; set; }
         public int intentosFallidos { get; set; }
         public bool bloqueado { get; set; }
+        public bool isVip { get; set; }
         public string password { get; set; }
         public List<PlazoFijo> pf { get; set; }
         public List<Tarjeta> tarjetas { get; set; }
@@ -37,6 +38,7 @@ namespace WebApplication_plataformas_de_desarrollo.Models
             this.password = Password;
             this.intentosFallidos = IntentosFallidos;
             this.bloqueado = Bloqueado;
+            this.isVip = false;
             this.isAdmin = Is_admin;
             this.pagos = new List<Pago>();
             this.cajas = new List<CajaDeAhorro>();
@@ -58,6 +60,8 @@ namespace WebApplication_plataformas_de_desarrollo.Models
             this.cajas = new List<CajaDeAhorro>();
             this.pf = new List<PlazoFijo>();
             this.tarjetas = new List<Tarjeta>();
+            this.isVip = false;
+
         }
 
         public Usuario(string Nombre, string Apellido, int Dni, string Mail, string Password)
@@ -71,6 +75,8 @@ namespace WebApplication_plataformas_de_desarrollo.Models
             this.cajas = new List<CajaDeAhorro>();
             this.pf = new List<PlazoFijo>();
             this.tarjetas = new List<Tarjeta>();
+            this.isVip = false;
+
         }
 
         public override string ToString()
