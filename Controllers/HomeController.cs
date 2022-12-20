@@ -35,7 +35,7 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         public IActionResult Index()
         {
             var sessionUserId = HttpContext.Session.GetInt32("IdUsuario");
-            ViewData["mensaje"] = (sessionUserId != null && usuarioLogueado != null) ? "Bienvenido " + usuarioLogueado.nombre + " " + usuarioLogueado.apellido : "Inicia sesión para continuar";
+            ViewData["mensaje"] = (sessionUserId != null && usuarioLogueado != null) ? "Bienvenido " + usuarioLogueado.nombre + " " + usuarioLogueado.apellido + ", "+ usuarioLogueado.mail : "Inicia sesión para continuar";
             return View();
         }
 

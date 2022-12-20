@@ -133,6 +133,29 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction("Index", "PlazosFijos");
         }
+        // GET: PlazosFijos/Precancelar/5
+        [HttpGet]
+        public async Task<IActionResult> Precancelar(int? id, string mensaje = "")
+        {
+            ViewData["mensaje"] = mensaje;
+            if (usuarioLogueado == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            PlazoFijo? pf = await _context.plazosFijos.FindAsync(id);
+            if (pf == null)
+            {
+                return RedirectToAction("Index", "PlazosFijos", new { mensaje = "Plazo fijo no encontrado." });
+            }
+            CajaDeAhorro caja = _context.cajas.Where(c => c.cbu == pf.cbu).FirstOrDefault();
+            float saldo_a_pagar = pf.monto / 2;
+            caja.saldo = caja.saldo + saldo_a_pagar;
+            pf.pagado = true;
+            _context.Update(pf);
+            _context.Update(caja);
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Index", "PlazosFijos");
+        }
 
         public async Task<IActionResult> Pagar()
         {

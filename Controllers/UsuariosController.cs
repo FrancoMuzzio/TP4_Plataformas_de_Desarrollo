@@ -84,7 +84,7 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(int dni, string nombre, string apellido, string mail, string password, string password2 = "", string mensaje = "")
+        public async Task<IActionResult> Create(int dni, string nombre, string apellido, string mail, string password, bool isAdmin, string password2 = "", string mensaje = "")
         {
             ViewData["mensaje"] = mensaje;
             if (usuarioLogueado != null && usuarioLogueado.isAdmin)
@@ -105,7 +105,7 @@ namespace WebApplication_plataformas_de_desarrollo.Controllers
                 {
                     return (usuarioLogueado != null && usuarioLogueado.isAdmin) ? RedirectToAction("Create", "Usuarios", new { mensaje = "Las contraseñas no coinciden." }) : RedirectToAction("Registrarse", "Home", new { mensaje = "Las contraseñas no coinciden." });
                 }
-                Usuario nuevo = new Usuario(dni, nombre, apellido, mail, password, 0, false, false);
+                Usuario nuevo = new Usuario(dni, nombre, apellido, mail, password, 0, false, isAdmin);
                 _context.usuarios.Add(nuevo);
                 await _context.SaveChangesAsync();
                 return (usuarioLogueado != null && usuarioLogueado.isAdmin) ? RedirectToAction(nameof(Index)) : RedirectToAction("Index", "Home");

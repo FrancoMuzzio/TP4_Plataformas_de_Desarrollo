@@ -39,6 +39,7 @@
             <td>
                 @if (item.pagado)
                 {
+                    <a type="button" class="btn btn-dark btn-sm" asp-action="Precancelar" asp-route-id="@item.id">Precancelar</a>
                     <a type="button" class="btn btn-dark btn-sm" asp-action="Delete" asp-route-id="@item.id">Eliminar</a>
                 }
             </td>
